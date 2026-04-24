@@ -44,8 +44,8 @@ export default async function handler(req, res) {
     try {
         const todayStr = new Date().toLocaleString("en-CA", {timeZone: "Europe/Istanbul"}).split(',')[0];
         
-        // API'den 2024 sezonunu (güncel sezon) çekiyoruz
-        const response = await fetch(`https://v3.football.api-sports.io/fixtures?date=${todayStr}&season=2024&timezone=Europe/Istanbul`, {
+        // API'den 2025 sezonunu (güncel sezon) çekiyoruz
+        const response = await fetch(`https://v3.football.api-sports.io/fixtures?date=${todayStr}&season=2025&timezone=Europe/Istanbul`, {
             headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
         });
         const json = await response.json();
