@@ -15,7 +15,7 @@ export default async function handler(req, res) {
         const todayStr = new Date().toLocaleString("en-CA", {timeZone: "Europe/Istanbul"}).split(',')[0];
         
         // DİKKAT: Senin uyarınla sezon tekrar 2025 yapıldı!
-        const response = await fetch(`https://v3.football.api-sports.io/fixtures?date=${todayStr}&season=2025&timezone=Europe/Istanbul`, {
+       const response = await fetch(`https://v3.football.api-sports.io/fixtures?date=${todayStr}&season=2024&timezone=Europe/Istanbul`, {
             headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
         });
         const json = await response.json();
