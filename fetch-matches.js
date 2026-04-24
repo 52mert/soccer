@@ -12,8 +12,9 @@ export default async function handler(req, res) {
     }
 
     try {
-        // 2. BUGÜNÜN MAÇLARINI ÇEK
         const today = new Date().toISOString().split('T')[0];
+
+        // 2. API'DEN BUGÜNÜN TÜM MAÇLARINI ÇEK
         const response = await fetch(`https://v3.football.api-sports.io/fixtures?date=${today}&season=2025`, {
             headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
         });
@@ -24,82 +25,84 @@ export default async function handler(req, res) {
             return res.status(200).json({ message: "Bugün için planlanan maç bulunamadı." });
         }
 
-        // DİKKAT: Eski günleri silme kodunu BURADAN KALDIRDIK! 
-        // matches tablosu tüm sezonu tuttuğu için asla silinmemeli.
+        // --- BÖLÜM A: GÜNLÜK VİTRİN (daily_matches) İŞLEMLERİ ---
+        // Geçmiş günleri temizle (Sadece Vitrin Tablosu Sıfırlanır)
+        await supabase.from('daily_matches').delete().lt('match_date', today);
 
-        // 3. BUGÜNÜN MAÇLARINI "matches" TABLOSUNDA GÜNCELLE (Upsert)
-        // Oynanan maçların skoru (1H, FT vb.) anında ana fikstüre işlenir.
-        const dailyData = allMatches.map(m => ({
-            id: m.fixture.id,
-            league_id: m.league.id,
-            home_team_id: m.teams.home.id,
-            away_team_id: m.teams.away.id,
-            home_team_name: m.teams.home.name,
-            away_team_name: m.teams.away.name,
-            home_team_logo: m.teams.home.logo,
-            away_team_logo: m.teams.away.logo,
-            home_score: m.goals.home, 
-            away_score: m.goals.away, 
-            status: m.fixture.status.short,
-            match_date: m.fixture.date,
-            season: '2025'
+        // Bugünün tüm maçlarını vitrine ekle (Frontend'deki arama ve listeleme için)
+        const vitrinData = allMatches.map(m => ({
+            match_id: m.fixture.id,
+            home_name: m.teams.home.name,
+            away_name: m.teams.away.name,
+            home_logo: m.teams.home.logo,
+            away_logo: m.teams.away.logo,
+            home_score: m.goals.home,
+            away_score: m.goals.away,
+            status_short: m.fixture.status.short,
+            elapsed: m.fixture.status.elapsed,
+            match_date: m.fixture.date
         }));
 
-        const { error: upsertError } = await supabase.from('matches').upsert(dailyData);
-        if (upsertError) throw new Error("Supabase fikstür kayıt hatası: " + upsertError.message);
+        await supabase.from('daily_matches').upsert(vitrinData);
 
-        // 4. GÜNÜN 3 MAÇINI SEÇME ALGORİTMASI
+        // --- BÖLÜM B: ANA DEPO (matches) GÜNCELLEME (SADECE SÜPER LİG 2025) ---
+        const superLigMatches = allMatches.filter(m => m.league.id === 203);
+        
+        if (superLigMatches.length > 0) {
+            const archiveData = superLigMatches.map(m => ({
+                id: m.fixture.id,
+                league_id: m.league.id,
+                home_team_name: m.teams.home.name,
+                away_team_name: m.teams.away.name,
+                home_score: m.goals.home,
+                away_score: m.goals.away,
+                status: m.fixture.status.short,
+                match_date: m.fixture.date,
+                season: '2025',
+                home_team_logo: m.teams.home.logo,
+                away_team_logo: m.teams.away.logo
+            }));
+            
+            // Sadece bu maçları güncelle (Maç sayıları ve goller 'upsert' sayesinde asla çift sayılmaz)
+            await supabase.from('matches').upsert(archiveData);
+        }
+
+        // --- BÖLÜM C: İSTATİSTİK DEPOSU (selected_matches) ---
+        // Günün 3 Maçı Seçimi
         const bigThreeIds = [19, 543, 648]; 
-        const superLigId = 203;
-        const topLeagues = [39, 140, 135, 78, 61]; 
-
         let selectedMatches = allMatches.sort((a, b) => {
             const getPriorityScore = (m) => {
-                const homeId = m.teams.home.id;
-                const awayId = m.teams.away.id;
-                const leagueId = m.league.id;
-
-                if (bigThreeIds.includes(homeId) || bigThreeIds.includes(awayId)) return 1;
-                if (leagueId === superLigId) return 2;
-                if (topLeagues.includes(leagueId)) return 3;
+                if (bigThreeIds.includes(m.teams.home.id) || bigThreeIds.includes(m.teams.away.id)) return 1;
+                if (m.league.id === 203) return 2;
+                if ([39, 140, 135, 78, 61].includes(m.league.id)) return 3;
                 return 4;
             };
-
             return getPriorityScore(a) - getPriorityScore(b);
-        }).slice(0, 3); 
+        }).slice(0, 3);
 
-        // 5. API KOTASINI KORUYAN İSTATİSTİK ÇEKİCİ (selected_matches)
         const activeStatuses = ['1H', '2H', 'HT', 'LIVE', 'ET', 'P', 'BT'];
 
         for (const match of selectedMatches) {
-            const status = match.fixture.status.short;
-
-            if (!activeStatuses.includes(status)) {
-                console.log(`Maç ${match.fixture.id} aktif değil (${status}). Kota harcanmadı.`);
-                continue; 
-            }
-
-            const detailRes = await fetch(`https://v3.football.api-sports.io/fixtures?id=${match.fixture.id}`, {
-                headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
-            });
-            const detailJson = await detailRes.json();
-            
-            if (detailJson.response && detailJson.response.length > 0) {
-                const m = detailJson.response[0];
-
-                // İstatistikleri ve olayları ana tabloya (veya selected_matches) yaz
-                await supabase.from('matches')
-                    .update({ 
+            // Eğer maç canlıysa istatistik çek
+            if (activeStatuses.includes(match.fixture.status.short)) {
+                const detailRes = await fetch(`https://v3.football.api-sports.io/fixtures?id=${match.fixture.id}`, {
+                    headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
+                });
+                const detailJson = await detailRes.json();
+                
+                if (detailJson.response && detailJson.response.length > 0) {
+                    const m = detailJson.response[0];
+                    await supabase.from('selected_matches').upsert({
+                        match_id: m.fixture.id,
+                        stats: m.statistics,
                         events: m.events,
-                        // stats: m.statistics 
-                    })
-                    .eq('id', m.fixture.id);
+                        updated_at: new Date()
+                    });
+                }
             }
         }
 
-        return res.status(200).json({ 
-            message: "Fikstür başarıyla güncellendi (Eski maçlar güvende!)." 
-        });
+        return res.status(200).json({ message: "Sistem senkronizasyonu tamamlandı." });
 
     } catch (err) {
         return res.status(500).json({ error: err.message });
