@@ -37,50 +37,62 @@ async function selectLeague(leagueId) {
 
 // 3. Veri Çekme Motoru
 // 3. Veri Çekme Motoru (Algoritmik Versiyon)
+// 3. Veri Çekme Motoru (CANLI DESTEKLİ PROFESYONEL VERSİYON)
 async function fetchStandings(leagueId, season) {
     const tbody = document.getElementById("standingBody");
     if(!tbody) return;
     
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">🔄 Yükleniyor...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">🔄 Puan Durumu Hesaplanıyor...</td></tr>';
 
     let finalData = [];
 
-    // --- PROFESYONEL HESAPLAMA MOTORU (Tüm Seneler ve Ligler İçin) ---
-    // Artık sadece 2025 değil, matches tablosunda verisi olan her şey için çalışır
     console.log(`${leagueId} ligi ${season} sezonu hesaplanıyor...`);
     
+    // SİHİR 1: Artık sadece FT değil, canlı oynanan maçları da dahil ediyoruz!
+    const validStatuses = ['FT', '1H', '2H', 'HT', 'LIVE', 'ET', 'P', 'BT'];
+
     const { data: matches, error: matchError } = await _supabase
         .from('matches')
         .select('*')
         .eq('league_id', leagueId)
         .eq('season', String(season))
-        .eq('status', 'FT'); // Sadece bitmiş maçlar
+        .in('status', validStatuses); // Canlı maçlar da matematiğe dahil oldu
 
-    // Eğer matches tablosunda bu yıla ait veri varsa hesapla
     if (!matchError && matches && matches.length > 0) {
         let hesaplananTablo = {};
+        let canliTakimlar = new Set(); // O an maçı oynanan takımları hafızada tutacağız
 
         matches.forEach(mac => {
+            // SİHİR 2: Eğer maç henüz bitmediyse (canlıysa), bu takımları kırmızı listeye (Set) al
+            if (mac.status !== 'FT') {
+                canliTakimlar.add(mac.home_team_name);
+                canliTakimlar.add(mac.away_team_name);
+            }
+
             if (!hesaplananTablo[mac.home_team_name]) {
                 hesaplananTablo[mac.home_team_name] = { 
                     takim_adi: mac.home_team_name, 
-                    logo: mac.home_team_logo, // Logoyu buradan alıyoruz
+                    logo: mac.home_team_logo,
                     om: 0, g: 0, b: 0, m: 0, puan: 0, averaj: 0 
                 };
             }
             if (!hesaplananTablo[mac.away_team_name]) {
                 hesaplananTablo[mac.away_team_name] = { 
                     takim_adi: mac.away_team_name, 
-                    logo: mac.away_team_logo, // Logoyu buradan alıyoruz
+                    logo: mac.away_team_logo,
                     om: 0, g: 0, b: 0, m: 0, puan: 0, averaj: 0 
                 };
             }
 
+            // Oynanan Maç Sayısı (Canlı maçları da oynanmış kabul ediyoruz anlık puan için)
             hesaplananTablo[mac.home_team_name].om++;
             hesaplananTablo[mac.away_team_name].om++;
+            
+            // Averaj Hesaplama
             hesaplananTablo[mac.home_team_name].averaj += (mac.home_score - mac.away_score);
             hesaplananTablo[mac.away_team_name].averaj += (mac.away_score - mac.home_score);
 
+            // Galibiyet, Beraberlik, Mağlubiyet ve Puanlar
             if (mac.home_score > mac.away_score) {
                 hesaplananTablo[mac.home_team_name].g++;
                 hesaplananTablo[mac.away_team_name].m++;
@@ -97,12 +109,39 @@ async function fetchStandings(leagueId, season) {
             }
         });
 
+        // Puan ve Averaja göre sıralama
         finalData = Object.values(hesaplananTablo).sort((a, b) => {
             if (b.puan === a.puan) return b.averaj - a.averaj;
             return b.puan - a.puan;
         });
+
+        // --- EKRANA BASTIRMA ---
+        tbody.innerHTML = "";
+        finalData.forEach((team, index) => {
+            const teamLogo = team.logo || 'https://via.placeholder.com/24?text=?';
+            
+            // Eğer takım "canlıTakimlar" listesindeyse, isminin başına kırmızı yanan lambayı koy!
+            const isLive = canliTakimlar.has(team.takim_adi);
+            const liveIndicator = isLive ? `<span class="live-dot" title="Şu an oynuyor"></span>` : ``;
+
+            tbody.innerHTML += `
+                <tr style="${isLive ? 'background-color: rgba(255, 59, 48, 0.1);' : ''}"> <td>${index + 1}</td>
+                    <td style="text-align:left; display: flex; align-items: center; gap: 10px; border-bottom: none;">
+                        ${liveIndicator}
+                        <img src="${teamLogo}" 
+                             style="width: 24px; height: 24px; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));" 
+                             onerror="this.src='https://via.placeholder.com/24?text=?'">
+                        <strong style="${isLive ? 'color: #fff;' : ''}">${team.takim_adi}</strong>
+                    </td>
+                    <td>${team.om}</td>
+                    <td>${team.g}</td>
+                    <td>${team.b}</td>
+                    <td>${team.m}</td>
+                    <td style="color: #00ff00; font-weight: bold;">${team.puan}</td>
+                </tr>`;
+        });
     } 
-    // --- FALLBACK: Eğer matches boşsa eski statik tabloya bak ---
+    // Fallback kısmı aynen kalıyor
     else {
         let { data, error } = await _supabase
             .from('lig_siralamasi')
@@ -111,36 +150,28 @@ async function fetchStandings(leagueId, season) {
             .eq('sezon', String(season))
             .order('puan', { ascending: false });
 
-        if (!error) finalData = data;
+        if (!error && data && data.length > 0) {
+            tbody.innerHTML = "";
+            data.forEach((team, index) => {
+                const teamLogo = team.takim_logo || 'https://via.placeholder.com/24?text=?';
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td style="text-align:left; display: flex; align-items: center; gap: 10px; border-bottom: none;">
+                            <img src="${teamLogo}" style="width: 24px; height: 24px; object-fit: contain;">
+                            <strong>${team.takim_adi}</strong>
+                        </td>
+                        <td>${team.om}</td>
+                        <td>${team.g}</td>
+                        <td>${team.b}</td>
+                        <td>${team.m}</td>
+                        <td style="color: #00ff00; font-weight: bold;">${team.puan}</td>
+                    </tr>`;
+            });
+        } else {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center">⚠️ ${season} sezonu verisi bulunamadı.</td></tr>`;
+        }
     }
-
-    // --- EKRANA BASTIRMA ---
-    if (!finalData || finalData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center">⚠️ ${season} sezonu verisi bulunamadı.</td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = "";
-    finalData.forEach((team, index) => {
-        // Logo önceliği: Hesaplanan tablodan gelen logo veya statik tablodaki logo
-        const teamLogo = team.logo || team.takim_logo || 'https://via.placeholder.com/24?text=?';
-
-        tbody.innerHTML += `
-            <tr>
-                <td>${index + 1}</td>
-                <td style="text-align:left; display: flex; align-items: center; gap: 10px; border-bottom: none;">
-                    <img src="${teamLogo}" 
-                         style="width: 24px; height: 24px; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));" 
-                         onerror="this.src='https://via.placeholder.com/24?text=?'">
-                    <strong>${team.takim_adi}</strong>
-                </td>
-                <td>${team.om}</td>
-                <td>${team.g}</td>
-                <td>${team.b}</td>
-                <td>${team.m}</td>
-                <td style="color: #00ff00; font-weight: bold;">${team.puan}</td>
-            </tr>`;
-    });
 }
 // 5. Sezon Değişince
 function changeSeason() {
