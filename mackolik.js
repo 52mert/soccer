@@ -37,39 +37,46 @@ async function getMatches(type) {
     try {
         matchesDiv.innerHTML = "<div class='loading'>Aga-Scorer Verileri Yükleniyor...</div>";
 
-        // DİKKAT: Artık 'daily_matches' tablosundan çekiyoruz
-        let url = `${SUPABASE_URL}/rest/v1/daily_matches?select=*`;
+        // İki tablodan aynı anda veri çekiyoruz (daily_matches ve selected_matches)
+        const headers = {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json"
+        };
 
-        const res = await fetch(url, {
-            method: "GET",
-            headers: {
-                "apikey": SUPABASE_ANON_KEY,
-                "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-                "Content-Type": "application/json"
-            }
-        });
+        const [resDaily, resSelected] = await Promise.all([
+            fetch(`${SUPABASE_URL}/rest/v1/daily_matches?select=*`, { method: "GET", headers }),
+            fetch(`${SUPABASE_URL}/rest/v1/selected_matches?select=match_id`, { method: "GET", headers })
+        ]);
 
-        if (!res.ok) throw new Error("Veritabanına bağlanılamadı!");
+        if (!resDaily.ok) throw new Error("Veritabanına bağlanılamadı!");
 
-        const data = await res.json();
+        const data = await resDaily.json();
+        const selectedData = await resSelected.json();
+        
+        // Hangi maçların "Seçilmiş Maç" olduğunu bir listeye alıyoruz
+        const selectedIds = selectedData.map(s => s.match_id);
         
         if (data && data.length > 0) {
             let filtrelenmisMaclar = data;
             
-            // BUGÜNÜN TARİHİNİ ALIYORUZ (Örn: 2026-04-24)
             const bugun = new Date().toISOString().split('T')[0];
 
-            // FİLTRELEME MANTIĞI:
             if (type === "live") {
-                // Canlı maç statüsünde olanları göster (Sütun adı: status_short)
                 const canliDurumlar = ["1H", "2H", "HT", "ET", "P", "LIVE"];
                 filtrelenmisMaclar = data.filter(match => canliDurumlar.includes(match.status_short));
+                
+                // MÜKEMMEL ALGORİTMA: Seçilmiş maçları en üste al (1 değeri alır, diğerleri 0 alır, büyükten küçüğe sıralar)
+                filtrelenmisMaclar.sort((a, b) => {
+                    const aIsSelected = selectedIds.includes(a.match_id) ? 1 : 0;
+                    const bIsSelected = selectedIds.includes(b.match_id) ? 1 : 0;
+                    return bIsSelected - aIsSelected; 
+                });
+
             } else if (type === "today" || !type) {
-                // Sadece tarihi bugün olanları göster (eski günlerin maçlarını gizler)
                 filtrelenmisMaclar = data.filter(match => match.match_date && match.match_date.startsWith(bugun));
             }
 
-            // Ekrana basma işlemi
             if (filtrelenmisMaclar.length > 0) {
                 showMatches(filtrelenmisMaclar);
             } else {
@@ -98,7 +105,6 @@ function showMatches(matches) {
     container.innerHTML = ""; 
 
     matches.forEach(match => {
-        // Sütun isimleri tam olarak Supabase 'daily_matches' tablosuna uyarlandı
         const homeTeam = match.home_name;
         const awayTeam = match.away_name;
         const homeLogo = match.home_logo;
@@ -115,7 +121,7 @@ function showMatches(matches) {
             zamanBilgisi = "MS";
             zamanClass2 = "finished";
         } else if (["1H", "2H", "HT", "ET", "P", "LIVE"].includes(statusShort)) {
-            zamanBilgisi = (statusShort === "HT") ? "DA" : `${elapsed}'`; // elapsed (dakika) verin de varmış, onu da kullandık
+            zamanBilgisi = (statusShort === "HT") ? "DA" : `${elapsed}'`; 
             zamanClass2 = "live-now";
         } else {
             const matchDate = new Date(match.match_date);
@@ -144,14 +150,14 @@ function showMatches(matches) {
         `;
 
         card.addEventListener("click", () => {
-            localStatistics(match.match_id); // ID sütunu match_id olarak güncellendi
+            localStatistics(match.match_id); 
         });
 
         container.appendChild(card);
     });
 }
 
-// 6. MAÇ DETAYLARI (İSTATİSTİK VE OLAYLAR)
+// 6. MAÇ DETAYLARI (ÇİFT TABLO BİRLEŞİMİ)
 async function localStatistics(matchId) {
     const matchesContainer = document.getElementById("matches");
     const statsPage = document.getElementById("statsPage");
@@ -167,17 +173,22 @@ async function localStatistics(matchId) {
     eventsList.innerHTML = "";
 
     try {
-        // match_id üzerinden çekiyoruz
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/daily_matches?match_id=eq.${matchId}&select=*`, {
-            method: "GET",
-            headers: {
-                "apikey": SUPABASE_ANON_KEY,
-                "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-            }
-        });
+        const headers = {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+        };
+
+        // Hem skor/takım bilgilerini hem de istatistik/olayları aynı anda çekiyoruz
+        const [resMatch, resDetails] = await Promise.all([
+            fetch(`${SUPABASE_URL}/rest/v1/daily_matches?match_id=eq.${matchId}&select=*`, { method: "GET", headers }),
+            fetch(`${SUPABASE_URL}/rest/v1/selected_matches?match_id=eq.${matchId}&select=*`, { method: "GET", headers })
+        ]);
         
-        const data = await res.json();
-        const match = data[0]; 
+        const dataMatch = await resMatch.json();
+        const dataDetails = await resDetails.json();
+        
+        const match = dataMatch[0]; 
+        const details = dataDetails[0] || {}; // Eğer o maç selected_matches tablosunda yoksa boş obje oluştur
 
         if (!match) {
             header.innerHTML = "<div style='text-align:center; color:red;'>Maç detayı bulunamadı.</div>";
@@ -222,7 +233,7 @@ async function localStatistics(matchId) {
                 </div>
             </div>`;
 
-        // NOT: daily_matches tablosunda stats ve events sütunları varsa çalışır.
+        // İSTATİSTİKLER (Artık details.stats üzerinden alınıyor)
         statsList.innerHTML = "<h3 style='border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:15px;'>Maç İstatistikleri</h3>";
         
         const statTranslations = {
@@ -232,9 +243,9 @@ async function localStatistics(matchId) {
             "Goalkeeper Saves": "Kaleci Kurtarışı", "Total passes": "Toplam Pas", "Passes accurate": "İsabetli Pas", "Passes %": "Pas Başarısı (%)"
         };
 
-        if (match.stats && match.stats.length === 2) {
-            const homeStats = match.stats[0].statistics;
-            const awayStats = match.stats[1].statistics;
+        if (details.stats && details.stats.length === 2) {
+            const homeStats = details.stats[0].statistics;
+            const awayStats = details.stats[1].statistics;
 
             homeStats.forEach(stat => {
                 const hValRaw = stat.value;
@@ -272,13 +283,13 @@ async function localStatistics(matchId) {
             statsList.innerHTML += "<div class='no-data' style='color:#7f8c8d; text-align:center;'>Bu maç için istatistik bulunmuyor.</div>";
         }
 
+        // OLAYLAR (Artık details.events üzerinden alınıyor)
         eventsList.innerHTML = "<h3 style='border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:15px; margin-top:30px;'>Maç Olayları</h3>";
         
-        if (match.events && match.events.length > 0) {
-            const tumOlaylar = [...match.events].sort((a, b) => a.time.elapsed - b.time.elapsed);
+        if (details.events && details.events.length > 0) {
+            const tumOlaylar = [...details.events].sort((a, b) => a.time.elapsed - b.time.elapsed);
 
             tumOlaylar.forEach(event => {
-                // daily_matches tablosundaki takımlara göre kontrol
                 const isHome = event.team.name === match.home_name;
                 const flexDir = isHome ? "row" : "row-reverse";
                 const textAlign = isHome ? "left" : "right";
