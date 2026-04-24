@@ -11,7 +11,6 @@ const searchInput = document.getElementById("takim-ara");
 const sonuclarDiv = document.getElementById("sonuclar");
 
 let tumMaclar = []; 
-let gonderilcekMaclar= [];
 
 // 3. TIKLAMA OLAYLARI (Üst Menü)
 navItems.forEach(item => {
@@ -38,8 +37,8 @@ async function getMatches(type) {
     try {
         matchesDiv.innerHTML = "<div class='loading'>Aga-Scorer Verileri Yükleniyor...</div>";
 
-        // Supabase'den tüm maçları çekiyoruz
-        let url = `${SUPABASE_URL}/rest/v1/matches?select=*`;
+        // DİKKAT: Artık 'daily_matches' tablosundan çekiyoruz
+        let url = `${SUPABASE_URL}/rest/v1/daily_matches?select=*`;
 
         const res = await fetch(url, {
             method: "GET",
@@ -62,9 +61,9 @@ async function getMatches(type) {
 
             // FİLTRELEME MANTIĞI:
             if (type === "live") {
-                // Sadece canlı statüsünde olanları göster
+                // Canlı maç statüsünde olanları göster (Sütun adı: status_short)
                 const canliDurumlar = ["1H", "2H", "HT", "ET", "P", "LIVE"];
-                filtrelenmisMaclar = data.filter(match => canliDurumlar.includes(match.status));
+                filtrelenmisMaclar = data.filter(match => canliDurumlar.includes(match.status_short));
             } else if (type === "today" || !type) {
                 // Sadece tarihi bugün olanları göster (eski günlerin maçlarını gizler)
                 filtrelenmisMaclar = data.filter(match => match.match_date && match.match_date.startsWith(bugun));
@@ -99,13 +98,15 @@ function showMatches(matches) {
     container.innerHTML = ""; 
 
     matches.forEach(match => {
-        const homeTeam = match.home_team_name;
-        const awayTeam = match.away_team_name;
-        const homeLogo = match.home_team_logo;
-        const awayLogo = match.away_team_logo;
+        // Sütun isimleri tam olarak Supabase 'daily_matches' tablosuna uyarlandı
+        const homeTeam = match.home_name;
+        const awayTeam = match.away_name;
+        const homeLogo = match.home_logo;
+        const awayLogo = match.away_logo;
         const homeScore = match.home_score ?? 0;
         const awayScore = match.away_score ?? 0;
-        const statusShort = match.status;
+        const statusShort = match.status_short;
+        const elapsed = match.elapsed ?? 0;
         
         let zamanClass2 = "";
         let zamanBilgisi = "";
@@ -113,8 +114,8 @@ function showMatches(matches) {
         if (["FT", "AET", "PEN"].includes(statusShort)) {
             zamanBilgisi = "MS";
             zamanClass2 = "finished";
-        } else if (["1H", "2H", "HT", "ET", "P"].includes(statusShort)) {
-            zamanBilgisi = (statusShort === "HT") ? "DA" : "Canlı"; 
+        } else if (["1H", "2H", "HT", "ET", "P", "LIVE"].includes(statusShort)) {
+            zamanBilgisi = (statusShort === "HT") ? "DA" : `${elapsed}'`; // elapsed (dakika) verin de varmış, onu da kullandık
             zamanClass2 = "live-now";
         } else {
             const matchDate = new Date(match.match_date);
@@ -143,7 +144,7 @@ function showMatches(matches) {
         `;
 
         card.addEventListener("click", () => {
-            localStatistics(match.id);
+            localStatistics(match.match_id); // ID sütunu match_id olarak güncellendi
         });
 
         container.appendChild(card);
@@ -166,7 +167,8 @@ async function localStatistics(matchId) {
     eventsList.innerHTML = "";
 
     try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/matches?id=eq.${matchId}&select=*`, {
+        // match_id üzerinden çekiyoruz
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/daily_matches?match_id=eq.${matchId}&select=*`, {
             method: "GET",
             headers: {
                 "apikey": SUPABASE_ANON_KEY,
@@ -184,15 +186,16 @@ async function localStatistics(matchId) {
 
         const homeScore = match.home_score ?? 0;
         const awayScore = match.away_score ?? 0;
-        const statusShort = match.status;
+        const statusShort = match.status_short;
+        const elapsed = match.elapsed ?? 0;
 
         let zamanBilgisi = "Başlamadı";
         let zamanClassDetay = "";
 
         if (["FT", "AET", "PEN"].includes(statusShort)) {
             zamanBilgisi = "MS";
-        } else if (["1H", "2H", "HT", "ET", "P"].includes(statusShort)) {
-            zamanBilgisi = `<span style="color:#27ae60;">${statusShort === "HT" ? "DA" : "Canlı"}</span>`;
+        } else if (["1H", "2H", "HT", "ET", "P", "LIVE"].includes(statusShort)) {
+            zamanBilgisi = `<span style="color:#27ae60;">${statusShort === "HT" ? "DA" : elapsed + "'"}</span>`;
             zamanClassDetay = "live-now";
         } else {
             const matchDate = new Date(match.match_date);
@@ -205,8 +208,8 @@ async function localStatistics(matchId) {
             </div>
             <div class="header-teams" style="display:flex; justify-content:space-around; align-items:center;">
                 <div class="header-team" style="text-align:center;">
-                    <img src="${match.home_team_logo}" width="60" style="border-radius:50%;">
-                    <p style="margin-top:10px; font-weight:bold;">${match.home_team_name}</p>
+                    <img src="${match.home_logo}" width="60" style="border-radius:50%;">
+                    <p style="margin-top:10px; font-weight:bold;">${match.home_name}</p>
                 </div>
                 <div class="header-score-container">
                     <div class="header-score" style="font-size: 36px; font-weight: bold; background: #f8f9fa; padding: 10px 30px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
@@ -214,11 +217,12 @@ async function localStatistics(matchId) {
                     </div>
                 </div>
                 <div class="header-team" style="text-align:center;">
-                    <img src="${match.away_team_logo}" width="60" style="border-radius:50%;">
-                    <p style="margin-top:10px; font-weight:bold;">${match.away_team_name}</p>
+                    <img src="${match.away_logo}" width="60" style="border-radius:50%;">
+                    <p style="margin-top:10px; font-weight:bold;">${match.away_name}</p>
                 </div>
             </div>`;
 
+        // NOT: daily_matches tablosunda stats ve events sütunları varsa çalışır.
         statsList.innerHTML = "<h3 style='border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:15px;'>Maç İstatistikleri</h3>";
         
         const statTranslations = {
@@ -274,7 +278,8 @@ async function localStatistics(matchId) {
             const tumOlaylar = [...match.events].sort((a, b) => a.time.elapsed - b.time.elapsed);
 
             tumOlaylar.forEach(event => {
-                const isHome = event.team.id === match.home_team_id;
+                // daily_matches tablosundaki takımlara göre kontrol
+                const isHome = event.team.name === match.home_name;
                 const flexDir = isHome ? "row" : "row-reverse";
                 const textAlign = isHome ? "left" : "right";
 
@@ -332,8 +337,8 @@ function filtrele() {
     if (arananKelime.length < 2) return;
 
     const bulunanlar = tumMaclar.filter(match => {
-        const homeName = (match.home_team_name || "").toLowerCase();
-        const awayName = (match.away_team_name || "").toLowerCase();
+        const homeName = (match.home_name || "").toLowerCase();
+        const awayName = (match.away_name || "").toLowerCase();
 
         return homeName.includes(arananKelime) || awayName.includes(arananKelime);
     });
