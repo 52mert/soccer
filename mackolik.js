@@ -1,6 +1,6 @@
 // 1. SUPABASE BAĞLANTI BİLGİLERİ (GÜVENLİ)
 const SUPABASE_URL = "https://xozwjuudbypmqewncdoo.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_XeQN6Ha9dWfJ_SqjLUsx9A_DM-8ld4k"; // Supabase Settings -> API kısmından al
+const SUPABASE_ANON_KEY = "sb_publishable_XeQN6Ha9dWfJ_SqjLUsx9A_DM-8ld4k"; 
 
 // 2. ELEMANLARI SEÇELİM
 const matchesDiv = document.getElementById("matches"); 
@@ -25,7 +25,7 @@ navItems.forEach(item => {
     });
 });
 
-// 4. SUPABASE'DEN VERİ ÇEKME (GET MATCHES)
+// 4. SUPABASE'DEN VERİ ÇEKME VE FİLTRELEME (GET MATCHES)
 async function getMatches(type) {
     if (!matchesDiv || !statsPage) {
         console.error("Hata: Gerekli HTML elemanları DOM'da bulunamadı.");
@@ -38,10 +38,9 @@ async function getMatches(type) {
     try {
         matchesDiv.innerHTML = "<div class='loading'>Aga-Scorer Verileri Yükleniyor...</div>";
 
-        // Supabase'deki 'matches' tablosundan tüm verileri çek
+        // Supabase'den tüm maçları çekiyoruz
         let url = `${SUPABASE_URL}/rest/v1/matches?select=*`;
 
-        // İstek atıyoruz (Artık API-Sports'a değil, kendi veritabanımıza!)
         const res = await fetch(url, {
             method: "GET",
             headers: {
@@ -56,19 +55,42 @@ async function getMatches(type) {
         const data = await res.json();
         
         if (data && data.length > 0) {
-            // İstersen burada 'type' (live, today) durumuna göre data üzerinde filtreleme de yapabilirsin
-            showMatches(data);
+            let filtrelenmisMaclar = data;
+            
+            // BUGÜNÜN TARİHİNİ ALIYORUZ (Örn: 2026-04-24)
+            const bugun = new Date().toISOString().split('T')[0];
+
+            // FİLTRELEME MANTIĞI:
+            if (type === "live") {
+                // Sadece canlı statüsünde olanları göster
+                const canliDurumlar = ["1H", "2H", "HT", "ET", "P", "LIVE"];
+                filtrelenmisMaclar = data.filter(match => canliDurumlar.includes(match.status));
+            } else if (type === "today" || !type) {
+                // Sadece tarihi bugün olanları göster (eski günlerin maçlarını gizler)
+                filtrelenmisMaclar = data.filter(match => match.match_date && match.match_date.startsWith(bugun));
+            }
+
+            // Ekrana basma işlemi
+            if (filtrelenmisMaclar.length > 0) {
+                showMatches(filtrelenmisMaclar);
+            } else {
+                if (type === "live") {
+                    matchesDiv.innerHTML = "<div class='no-match' style='text-align:center; padding:20px;'>Şu an oynanan canlı maç bulunmuyor.</div>";
+                } else {
+                    matchesDiv.innerHTML = "<div class='no-match' style='text-align:center; padding:20px;'>Bugün için planlanan maç bulunamadı.</div>";
+                }
+            }
         } else {
-            matchesDiv.innerHTML = "<div class='no-match'>Görüntülenecek maç bulunamadı.</div>";
+            matchesDiv.innerHTML = "<div class='no-match' style='text-align:center; padding:20px;'>Veritabanında henüz maç yok.</div>";
         }
 
     } catch (err) {
         console.error("Veri çekme hatası:", err);
-        matchesDiv.innerHTML = `<div class='error'>Hata: ${err.message}</div>`;
+        matchesDiv.innerHTML = `<div class='error' style='text-align:center; color:red;'>Hata: ${err.message}</div>`;
     }
 }
 
-// 5. EKRANA BASMA (SHOW MATCHES) - Veritabanı şemasına göre uyarlandı!
+// 5. EKRANA BASMA (SHOW MATCHES)
 function showMatches(matches) {
     const container = document.getElementById("matches");
     if (!container) return;
@@ -77,7 +99,6 @@ function showMatches(matches) {
     container.innerHTML = ""; 
 
     matches.forEach(match => {
-        // Artık veriler Supabase tablosundaki sütun adlarıyla geliyor
         const homeTeam = match.home_team_name;
         const awayTeam = match.away_team_name;
         const homeLogo = match.home_team_logo;
@@ -93,7 +114,7 @@ function showMatches(matches) {
             zamanBilgisi = "MS";
             zamanClass2 = "finished";
         } else if (["1H", "2H", "HT", "ET", "P"].includes(statusShort)) {
-            zamanBilgisi = (statusShort === "HT") ? "DA" : "Canlı"; // Backend süreyi tutmadığı için direkt canlı yazıyoruz
+            zamanBilgisi = (statusShort === "HT") ? "DA" : "Canlı"; 
             zamanClass2 = "live-now";
         } else {
             const matchDate = new Date(match.match_date);
@@ -121,7 +142,6 @@ function showMatches(matches) {
             <div class="match-time ${zamanClass2}">${zamanBilgisi}</div>
         `;
 
-        // Tıklanınca o maçın ID'sini localStatistics'e yolla
         card.addEventListener("click", () => {
             localStatistics(match.id);
         });
@@ -130,7 +150,7 @@ function showMatches(matches) {
     });
 }
 
-// 6. MAÇ DETAYLARI (İSTATİSTİK VE OLAYLAR) - Supabase'den tek maç çeker
+// 6. MAÇ DETAYLARI (İSTATİSTİK VE OLAYLAR)
 async function localStatistics(matchId) {
     const matchesContainer = document.getElementById("matches");
     const statsPage = document.getElementById("statsPage");
@@ -146,7 +166,6 @@ async function localStatistics(matchId) {
     eventsList.innerHTML = "";
 
     try {
-        // Supabase'den sadece tıklanan maçın ID'sine göre veri çekiyoruz
         const res = await fetch(`${SUPABASE_URL}/rest/v1/matches?id=eq.${matchId}&select=*`, {
             method: "GET",
             headers: {
@@ -156,7 +175,7 @@ async function localStatistics(matchId) {
         });
         
         const data = await res.json();
-        const match = data[0]; // Gelen dizinin ilk ve tek elemanı
+        const match = data[0]; 
 
         if (!match) {
             header.innerHTML = "<div style='text-align:center; color:red;'>Maç detayı bulunamadı.</div>";
@@ -180,7 +199,6 @@ async function localStatistics(matchId) {
             zamanBilgisi = matchDate.getHours().toString().padStart(2, '0') + ":" + matchDate.getMinutes().toString().padStart(2, '0');
         }
 
-        // --- HEADER ---
         header.innerHTML = `
             <div class="${zamanClassDetay}" style="text-align: center; font-weight: bold; margin-bottom: 15px;">
                 ${zamanBilgisi}
@@ -201,7 +219,6 @@ async function localStatistics(matchId) {
                 </div>
             </div>`;
 
-        // --- İSTATİSTİKLER ---
         statsList.innerHTML = "<h3 style='border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:15px;'>Maç İstatistikleri</h3>";
         
         const statTranslations = {
@@ -251,7 +268,6 @@ async function localStatistics(matchId) {
             statsList.innerHTML += "<div class='no-data' style='color:#7f8c8d; text-align:center;'>Bu maç için istatistik bulunmuyor.</div>";
         }
 
-        // --- OLAYLAR ---
         eventsList.innerHTML = "<h3 style='border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:15px; margin-top:30px;'>Maç Olayları</h3>";
         
         if (match.events && match.events.length > 0) {
@@ -297,7 +313,6 @@ async function localStatistics(matchId) {
         header.innerHTML = "<div style='color:red; text-align:center;'>Bağlantı hatası oluştu.</div>";
     }
 
-    // Geri Dönme Fonksiyonu
     document.getElementById("btnGeri").onclick = function() {
         statsPage.style.display = "none";
         matchesContainer.style.display = "block";
@@ -317,7 +332,6 @@ function filtrele() {
     if (arananKelime.length < 2) return;
 
     const bulunanlar = tumMaclar.filter(match => {
-        // Artık isimleri DB formatında kontrol ediyoruz
         const homeName = (match.home_team_name || "").toLowerCase();
         const awayName = (match.away_team_name || "").toLowerCase();
 
