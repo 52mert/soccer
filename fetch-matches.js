@@ -24,19 +24,11 @@ export default async function handler(req, res) {
             return res.status(200).json({ message: "Bugün için planlanan maç bulunamadı." });
         }
 
-        // 3. GEÇMİŞ GÜNLERİ TEMİZLE (Sıfırlama İşlemi)
-        // match_date'i bugünden küçük olan (yani düne ve daha eskiye ait) tüm maçları siler.
-        // Böylece veritabanın asla şişmez, sadece o günün taze verileri kalır.
-        const { error: deleteError } = await supabase
-            .from('matches')
-            .delete()
-            .lt('match_date', today); // "lt" = less than (daha küçük olanlar)
+        // DİKKAT: Eski günleri silme kodunu BURADAN KALDIRDIK! 
+        // matches tablosu tüm sezonu tuttuğu için asla silinmemeli.
 
-        if (deleteError) {
-            console.error("Eski maçları silerken hata oluştu:", deleteError);
-        }
-
-        // 4. TÜM MAÇLARI "matches" TABLOSUNA KAYDET (Fikstür Güncellemesi)
+        // 3. BUGÜNÜN MAÇLARINI "matches" TABLOSUNDA GÜNCELLE (Upsert)
+        // Oynanan maçların skoru (1H, FT vb.) anında ana fikstüre işlenir.
         const dailyData = allMatches.map(m => ({
             id: m.fixture.id,
             league_id: m.league.id,
@@ -53,14 +45,13 @@ export default async function handler(req, res) {
             season: '2025'
         }));
 
-        // Fikstürü veritabanına yaz (Aynı maç varsa üstüne yazar, yoksa ekler)
         const { error: upsertError } = await supabase.from('matches').upsert(dailyData);
         if (upsertError) throw new Error("Supabase fikstür kayıt hatası: " + upsertError.message);
 
-        // 5. GÜNÜN 3 MAÇINI SEÇME ALGORİTMASI (Puanlama Sistemi)
-        const bigThreeIds = [19, 543, 648]; // FB (19), BJK (543), GS (648)
+        // 4. GÜNÜN 3 MAÇINI SEÇME ALGORİTMASI
+        const bigThreeIds = [19, 543, 648]; 
         const superLigId = 203;
-        const topLeagues = [39, 140, 135, 78, 61]; // Premier Lig, La Liga, Serie A, Bundesliga, Ligue 1
+        const topLeagues = [39, 140, 135, 78, 61]; 
 
         let selectedMatches = allMatches.sort((a, b) => {
             const getPriorityScore = (m) => {
@@ -68,33 +59,26 @@ export default async function handler(req, res) {
                 const awayId = m.teams.away.id;
                 const leagueId = m.league.id;
 
-                // Öncelik 1: Büyük Üçlü
                 if (bigThreeIds.includes(homeId) || bigThreeIds.includes(awayId)) return 1;
-                // Öncelik 2: Diğer Süper Lig Maçları
                 if (leagueId === superLigId) return 2;
-                // Öncelik 3: Avrupa 5 Büyük Lig
                 if (topLeagues.includes(leagueId)) return 3;
-                // Öncelik 4: Diğer tüm maçlar (Rastgele gibi sona atılır)
                 return 4;
             };
 
             return getPriorityScore(a) - getPriorityScore(b);
-        }).slice(0, 3); // Sadece en tepeye çıkan 3 maçı al
+        }).slice(0, 3); 
 
-        // 6. API KOTASINI KORUYAN İSTATİSTİK/OLAY ÇEKİCİ
-        // Sadece canlı olan maçların istatistikleri çekilir
+        // 5. API KOTASINI KORUYAN İSTATİSTİK ÇEKİCİ (selected_matches)
         const activeStatuses = ['1H', '2H', 'HT', 'LIVE', 'ET', 'P', 'BT'];
 
         for (const match of selectedMatches) {
             const status = match.fixture.status.short;
 
-            // Eğer maç başlamadıysa veya bittiyse, pas geç!
             if (!activeStatuses.includes(status)) {
                 console.log(`Maç ${match.fixture.id} aktif değil (${status}). Kota harcanmadı.`);
                 continue; 
             }
 
-            // Maç canlıysa, detaylı istatistik ve olayları (events) çek
             const detailRes = await fetch(`https://v3.football.api-sports.io/fixtures?id=${match.fixture.id}`, {
                 headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
             });
@@ -103,11 +87,10 @@ export default async function handler(req, res) {
             if (detailJson.response && detailJson.response.length > 0) {
                 const m = detailJson.response[0];
 
-                // Sadece o maçın olaylarını matches tablosunda güncelle
+                // İstatistikleri ve olayları ana tabloya (veya selected_matches) yaz
                 await supabase.from('matches')
                     .update({ 
                         events: m.events,
-                        // Not: Eğer tablonda "stats" diye bir jsonb sütunu varsa alttaki yorumu kaldırabilirsin:
                         // stats: m.statistics 
                     })
                     .eq('id', m.fixture.id);
@@ -115,7 +98,7 @@ export default async function handler(req, res) {
         }
 
         return res.status(200).json({ 
-            message: "Eski maçlar temizlendi, yeni fikstür başarıyla senkronize edildi ve canlı istatistikler çekildi." 
+            message: "Fikstür başarıyla güncellendi (Eski maçlar güvende!)." 
         });
 
     } catch (err) {
