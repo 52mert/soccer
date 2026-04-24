@@ -24,8 +24,19 @@ export default async function handler(req, res) {
             return res.status(200).json({ message: "Bugün için planlanan maç bulunamadı." });
         }
 
-        // 3. TÜM MAÇLARI "matches" TABLOSUNA KAYDET (Fikstür Güncellemesi)
-        // Skorlar ve durumlar güncellenir, puan durumu frontend'deki JS ile hesaplanır.
+        // 3. GEÇMİŞ GÜNLERİ TEMİZLE (Sıfırlama İşlemi)
+        // match_date'i bugünden küçük olan (yani düne ve daha eskiye ait) tüm maçları siler.
+        // Böylece veritabanın asla şişmez, sadece o günün taze verileri kalır.
+        const { error: deleteError } = await supabase
+            .from('matches')
+            .delete()
+            .lt('match_date', today); // "lt" = less than (daha küçük olanlar)
+
+        if (deleteError) {
+            console.error("Eski maçları silerken hata oluştu:", deleteError);
+        }
+
+        // 4. TÜM MAÇLARI "matches" TABLOSUNA KAYDET (Fikstür Güncellemesi)
         const dailyData = allMatches.map(m => ({
             id: m.fixture.id,
             league_id: m.league.id,
@@ -42,11 +53,11 @@ export default async function handler(req, res) {
             season: '2025'
         }));
 
-        // Fikstürü veritabanına yaz
+        // Fikstürü veritabanına yaz (Aynı maç varsa üstüne yazar, yoksa ekler)
         const { error: upsertError } = await supabase.from('matches').upsert(dailyData);
         if (upsertError) throw new Error("Supabase fikstür kayıt hatası: " + upsertError.message);
 
-        // 4. GÜNÜN 3 MAÇINI SEÇME ALGORİTMASI (Puanlama Sistemi)
+        // 5. GÜNÜN 3 MAÇINI SEÇME ALGORİTMASI (Puanlama Sistemi)
         const bigThreeIds = [19, 543, 648]; // FB (19), BJK (543), GS (648)
         const superLigId = 203;
         const topLeagues = [39, 140, 135, 78, 61]; // Premier Lig, La Liga, Serie A, Bundesliga, Ligue 1
@@ -70,14 +81,14 @@ export default async function handler(req, res) {
             return getPriorityScore(a) - getPriorityScore(b);
         }).slice(0, 3); // Sadece en tepeye çıkan 3 maçı al
 
-        // 5. API KOTASINI KORUYAN İSTATİSTİK/OLAY ÇEKİCİ
-        // Sadece canlı olan maçların istatistikleri çekilir (1H, 2H, HT, ET, P, LIVE)
+        // 6. API KOTASINI KORUYAN İSTATİSTİK/OLAY ÇEKİCİ
+        // Sadece canlı olan maçların istatistikleri çekilir
         const activeStatuses = ['1H', '2H', 'HT', 'LIVE', 'ET', 'P', 'BT'];
 
         for (const match of selectedMatches) {
             const status = match.fixture.status.short;
 
-            // Eğer maç başlamadıysa (NS) veya bittiyse (FT, AET, PEN), pas geç. Kota harcama!
+            // Eğer maç başlamadıysa veya bittiyse, pas geç!
             if (!activeStatuses.includes(status)) {
                 console.log(`Maç ${match.fixture.id} aktif değil (${status}). Kota harcanmadı.`);
                 continue; 
@@ -92,11 +103,11 @@ export default async function handler(req, res) {
             if (detailJson.response && detailJson.response.length > 0) {
                 const m = detailJson.response[0];
 
-                // Sadece o maçın events (olaylar) ve stats verilerini matches tablosunda güncelle
+                // Sadece o maçın olaylarını matches tablosunda güncelle
                 await supabase.from('matches')
                     .update({ 
                         events: m.events,
-                        // Not: Eğer tablonda "stats" diye bir jsonb sütunu varsa alttaki yorumu kaldır:
+                        // Not: Eğer tablonda "stats" diye bir jsonb sütunu varsa alttaki yorumu kaldırabilirsin:
                         // stats: m.statistics 
                     })
                     .eq('id', m.fixture.id);
@@ -104,7 +115,7 @@ export default async function handler(req, res) {
         }
 
         return res.status(200).json({ 
-            message: "Fikstür başarıyla senkronize edildi ve canlı maçların istatistikleri çekildi." 
+            message: "Eski maçlar temizlendi, yeni fikstür başarıyla senkronize edildi ve canlı istatistikler çekildi." 
         });
 
     } catch (err) {
