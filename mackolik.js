@@ -37,7 +37,7 @@ async function getMatches(type) {
     try {
         matchesDiv.innerHTML = "<div class='loading'>Aga-Scorer Verileri Yükleniyor...</div>";
 
-        // İki tablodan aynı anda veri çekiyoruz (daily_matches ve selected_matches)
+        // İki tablodan aynı anda veri çekiyoruz
         const headers = {
             "apikey": SUPABASE_ANON_KEY,
             "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
@@ -54,28 +54,27 @@ async function getMatches(type) {
         const data = await resDaily.json();
         const selectedData = await resSelected.json();
         
-        // Hangi maçların "Seçilmiş Maç" olduğunu bir listeye alıyoruz
+        // Hangi maçların "Seçilmiş Maç" olduğunu listeye alıyoruz
         const selectedIds = selectedData.map(s => s.match_id);
         
         if (data && data.length > 0) {
             let filtrelenmisMaclar = data;
-            
             const bugun = new Date().toISOString().split('T')[0];
 
             if (type === "live") {
                 const canliDurumlar = ["1H", "2H", "HT", "ET", "P", "LIVE"];
                 filtrelenmisMaclar = data.filter(match => canliDurumlar.includes(match.status_short));
-                
-                // MÜKEMMEL ALGORİTMA: Seçilmiş maçları en üste al (1 değeri alır, diğerleri 0 alır, büyükten küçüğe sıralar)
-                filtrelenmisMaclar.sort((a, b) => {
-                    const aIsSelected = selectedIds.includes(a.match_id) ? 1 : 0;
-                    const bIsSelected = selectedIds.includes(b.match_id) ? 1 : 0;
-                    return bIsSelected - aIsSelected; 
-                });
-
             } else if (type === "today" || !type) {
                 filtrelenmisMaclar = data.filter(match => match.match_date && match.match_date.startsWith(bugun));
             }
+
+            // MÜKEMMEL ALGORİTMA: Artık hem "Live" hem "Today" için ortak çalışıyor!
+            // Seçilmiş maçları en üste alır.
+            filtrelenmisMaclar.sort((a, b) => {
+                const aIsSelected = selectedIds.includes(a.match_id) ? 1 : 0;
+                const bIsSelected = selectedIds.includes(b.match_id) ? 1 : 0;
+                return bIsSelected - aIsSelected; 
+            });
 
             if (filtrelenmisMaclar.length > 0) {
                 showMatches(filtrelenmisMaclar);
@@ -178,7 +177,6 @@ async function localStatistics(matchId) {
             "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
         };
 
-        // Hem skor/takım bilgilerini hem de istatistik/olayları aynı anda çekiyoruz
         const [resMatch, resDetails] = await Promise.all([
             fetch(`${SUPABASE_URL}/rest/v1/daily_matches?match_id=eq.${matchId}&select=*`, { method: "GET", headers }),
             fetch(`${SUPABASE_URL}/rest/v1/selected_matches?match_id=eq.${matchId}&select=*`, { method: "GET", headers })
@@ -188,7 +186,7 @@ async function localStatistics(matchId) {
         const dataDetails = await resDetails.json();
         
         const match = dataMatch[0]; 
-        const details = dataDetails[0] || {}; // Eğer o maç selected_matches tablosunda yoksa boş obje oluştur
+        const details = dataDetails[0] || {}; 
 
         if (!match) {
             header.innerHTML = "<div style='text-align:center; color:red;'>Maç detayı bulunamadı.</div>";
@@ -233,7 +231,7 @@ async function localStatistics(matchId) {
                 </div>
             </div>`;
 
-        // İSTATİSTİKLER (Artık details.stats üzerinden alınıyor)
+        // İSTATİSTİKLER
         statsList.innerHTML = "<h3 style='border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:15px;'>Maç İstatistikleri</h3>";
         
         const statTranslations = {
@@ -283,7 +281,7 @@ async function localStatistics(matchId) {
             statsList.innerHTML += "<div class='no-data' style='color:#7f8c8d; text-align:center;'>Bu maç için istatistik bulunmuyor.</div>";
         }
 
-        // OLAYLAR (Artık details.events üzerinden alınıyor)
+        // OLAYLAR
         eventsList.innerHTML = "<h3 style='border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:15px; margin-top:30px;'>Maç Olayları</h3>";
         
         if (details.events && details.events.length > 0) {
