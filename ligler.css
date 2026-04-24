@@ -1,0 +1,931 @@
+/* Lig Kartları Izgarası */
+.league-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+/* Dikdörtgen Kart Yapısı */
+.league-card {
+    height: 150px;
+    border-radius: 15px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.league-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+/* Saydam Katman (Overlay) */
+.overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.2));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.3s;
+}
+
+.league-card:hover .overlay {
+    background: rgba(37, 99, 235, 0.4); /* Hoverda hafif mavi saydamlık */
+}
+
+.overlay img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
+
+.overlay span {
+    font-weight: bold;
+    color: white;
+    font-size: 1.1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+/* Tablo Alanı Tasarımı */
+.standing-section {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 20px;
+    min-height: 400px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.puan-tablosu {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Senin meşhur mavi şeridin için örnek */
+.puan-tablosu tr:nth-child(-n+4) td:first-child {
+    border-left: 4px solid #2563eb;
+}
+
+/* Lig Kartları Izgarası - Güncellendi */
+.league-grid {
+    display: grid;
+    /* Yan yana 2'li kocaman kartlar yapar. Mobilde ekrana sığmazsa otomatik alt alta atar (Responsive) */
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); 
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+/* Dikdörtgen Kart Yapısı - Güncellendi */
+.league-card {
+    height: 220px; /* Resimlerin manzarası belli olsun diye boyunu uzattık */
+    border-radius: 15px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Saydam Katman (Overlay) - Resimler daha net okunsun diye koyuluğu biraz artırdım */
+.overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 10%, rgba(0,0,0,0.3) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.3s;
+}
+
+/* --- LİG KARTLARI (Sadece Bu Kısım) --- */
+.league-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); 
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.league-card {
+    height: 220px; 
+    border-radius: 15px;
+    /* Fotoğrafı karta tam oturtan ve merkeze hizalayan kodlar: */
+    background-size: cover; 
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.league-card:hover {
+    transform: translateY(-5px); 
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+/* Saydam Katman (Overlay) - Fotoğrafı hafif karartıp profesyonel gösterir */
+.overlay {
+    position: absolute;
+    inset: 0;
+    /* Alttan yukarıya doğru siyah geçiş. Arka planı hafif saydam yapar */
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 10%, rgba(0,0,0,0.3) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.3s;
+    padding: 20px;
+}
+
+.league-card:hover .overlay {
+    /* Fareyle üzerine gelince senin sevdiğin o saydam mavi efekt */
+    background: rgba(37, 99, 235, 0.6); 
+}
+
+.overlay img {
+    width: 80px; /* Logoyu biraz daha gösterişli yaptık */
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 15px;
+    filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.7)); /* Logoya derinlik katan gölge */
+    z-index: 2;
+}
+
+.overlay span {
+    font-weight: 800;
+    color: white;
+    font-size: 1.4rem;
+    /* Fotoğraf ne kadar karışık olursa olsun yazının net okunmasını sağlayan gölge */
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.9); 
+    letter-spacing: 1px;
+    z-index: 2;
+}
+.league-card {
+    height: 280px; /* Fotoğrafın heybeti ortaya çıksın diye biraz daha büyüttük */
+    border-radius: 15px;
+    
+    /* İŞTE SİHİRLİ KISIM BURASI */
+    background-size: cover; /* Resmi boşluk kalmayacak şekilde karta yayar */
+    background-position: center 15%; /* Oyuncuların kafası kesilmesin diye odağı biraz yukarı çektik */
+    background-repeat: no-repeat;
+    
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    /* Alttan yukarı siyah saydamlık. Arkadaki oyuncular net görünür. */
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.3s;
+}
+
+.league-card:hover .overlay {
+    background: rgba(37, 99, 235, 0.4); /* Fareyle üstüne gelince hafif mavi saydamlık */
+}
+
+.overlay span {
+    font-weight: 900;
+    color: white;
+    font-size: 1.8rem;
+    text-shadow: 3px 3px 8px rgba(0,0,0,0.9); /* Yazı fotoğrafta kaybolmasın diye kalın gölge */
+    z-index: 2;
+    margin-top: 150px; /* Yazıyı fotoğrafın alt kısmına doğru ittik, oyuncuların yüzünü kapatmasın */
+}
+
+.league-card {
+    height: 280px; 
+    border-radius: 15px;
+    background-size: cover;
+    
+    /* İŞTE YENİ ODAK NOKTASI! */
+    /* Odağı dikey ortanın biraz altına çekerek (65%) dört yüzü de kadraja sokarız. */
+    background-position: center 65%; 
+    
+    background-repeat: no-repeat;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.league-card {
+    height: 250px; 
+    border-radius: 15px;
+    
+    /* RESMİ KÜÇÜLTÜP TAM SIĞDIRAN KISIM */
+    background-size: contain; /* Resmi bozmadan, tamamı görünecek şekilde küçültür */
+    background-position: center; /* Resmi tam ortaya hizalar */
+    background-repeat: no-repeat; /* Resim küçük kalırsa yanlarda tekrarlamasın */
+    
+    /* Arka plan rengini koyu yapalım ki resmin dışında kalan yerler çirkin durmasın */
+    background-color: #0f172a; 
+
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    /* Saydamlığı biraz daha kıstım ki arkadaki oyuncular netleşsin */
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Yazıyı en alta iter */
+    padding-bottom: 20px;
+    align-items: center;
+    transition: background 0.3s;
+}
+
+.league-card:hover .overlay {
+    background: rgba(37, 99, 235, 0.3); /* Üstüne gelince çok hafif bir mavi parlama */
+}
+
+.overlay span {
+    font-weight: 800;
+    color: white;
+    font-size: 1.5rem;
+    text-shadow: 2px 2px 8px rgba(0,0,0,1); /* Yazı resmin üstünde mermi gibi okunsun */
+    z-index: 2;
+}
+.league-grid {
+    display: grid;
+    /* Grid yapınızı buraya ekleyebilirsiniz, örneğin: repeat(auto-fill, minmax(300px, 1fr)) */
+    gap: 16px; /* Kartlar arası boşluk */
+}
+
+.league-card {
+    /* Yatay görseli dikeyde de tam oturtmak için object-fit benzeri bir etki */
+    background-image: url('image_1.png'); /* Yeni, genişletilmiş görselin adı */
+    background-size: cover; /* Görseli, en-boy oranını koruyarak alanı kaplayacak şekilde ölçekler */
+    background-position: center center; /* Görseli hem yatayda hem dikeyde ortalar */
+    background-repeat: no-repeat;
+    
+    /* Kartın dikey ve yatay boyutlarını belirleyin. 
+       Yatay görsel için oran koruyarak yükseklik verilebilir. */
+    width: 100%; /* Konteynere tam sığdır */
+    height: 0; /* Aspect ratio padding ile yükseklik ayarı */
+    padding-bottom: 42.85%; /* 21:9 oranına (yatay görsel oranı) denk gelen dikey yükseklik. 
+                              Eğer daha kare bir kart istiyorsanız, cover özelliği kenarlardan kesecektir, 
+                              bu oran görselin tamamını göstermeye çalışır.
+                              Örneğin, daha dikey bir kart için: padding-bottom: 60% veya height: 250px gibi sabit bir değer kullanabilirsiniz. */
+    
+    border-radius: 12px; /* Köşe yuvarlama */
+    position: relative; /* İçerideki span'ın yerleşimi için gerekli */
+    overflow: hidden; /* Taşmaları gizle */
+    cursor: pointer;
+    transition: transform 0.2s ease; /* Hover efekti için */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Hafif gölge */
+}
+
+.league-card:hover {
+    transform: scale(1.02); /* Üzerine gelince hafif büyüme */
+}
+
+.league-card .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Metnin okunabilirliği için daha koyu bir karartma filtresi ekleyelim.
+       Yatay görselde renkler daha canlı, bu yüzden metin için daha koyu bir zemin gerekebilir. */
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 60%);
+    display: flex;
+    justify-content: center; /* Yatayda ortala */
+    align-items: flex-end; /* Dikeyde en alta yasla */
+    padding-bottom: 20px; /* Alttan metne boşluk bırak */
+    box-sizing: border-box; /* Padding'i genişliğe dahil et */
+}
+
+.league-card .overlay span {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    font-family: Arial, sans-serif; /* İstenen font */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Okunabilirlik için gölge */
+    max-width: 90%; /* Metnin kenarlara taşmasını engelle */
+    pointer-events: none; /* Span üzerine tıklanmayı devre dışı bırak, kart tıklamasını engellemesin */
+}
+
+.league-card {
+    position: relative; /* İçindeki öğeleri konumlandırmak için şart */
+    width: 100%;
+    aspect-ratio: 21 / 9; /* Geniş görsel oranını korur */
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.league-card .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Yazının arkasına hafif bir karartma ekleyerek okunabilirliği artırır */
+    background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.8) 100%);
+    
+    /* Hizalama Ayarları */
+    display: flex;
+    justify-content: flex-end; /* Yatayda sağa yasla */
+    align-items: flex-end;     /* Dikeyde alta yasla */
+    padding: 15px 20px;        /* Kenarlardan güvenli mesafe */
+    box-sizing: border-box;
+}
+
+.league-card span {
+    color: white;
+    font-size: clamp(16px, 2vw, 24px); /* Ekran boyutuna göre fontu ölçekler */
+    font-weight: bold;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    margin: 0;
+    white-space: nowrap; /* Yazının alt satıra geçmesini engeller */
+}
+
+.league-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Sadece tek bir geniş sütun olsun */
+    gap: 20px; /* Aralarındaki boşluk */
+    width: 100%;
+}
+
+.league-grid {
+    display: flex;
+    flex-direction: column; /* Alt alta dizilmelerini sağlar */
+    gap: 20px;
+}
+
+.league-grid {
+    display: flex;
+    flex-direction: column; /* Alt alta dizilmelerini sağlar */
+    gap: 15px;              /* Kartlar arasındaki boşluğu daralttık */
+    max-width: 500px;       /* Kartların maksimum genişliğini sınırladık (Bunu istediğin gibi değiştirebilirsin) */
+    margin: 0 auto;         /* Eğer ortalamak istersen bunu ekle */
+}
+
+.league-card {
+    position: relative;
+    width: 100%;            /* Grid genişliğine tam uyum sağlar */
+    aspect-ratio: 16 / 7;   /* 21/9 çok yayvandı, bunu biraz daha daralttık ki dikeyde az yer kaplasın */
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+/* Logo Boyutu */
+.league-logo {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 35px;            /* Logoyu da biraz küçülttük */
+    height: 35px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9); /* Arka plana hafif beyazlık vererek logoyu belirginleştirdik */
+    padding: 4px;
+    object-fit: contain;
+}
+
+/* Yazı Boyutu */
+.league-card .overlay span {
+    font-size: 18px;        /* Yazı fontunu küçülttük */
+    font-weight: bold;
+    color: white;
+}
+
+/* Ana Kapsayıcı: Kartları yan yana 2'li dizer */
+.league-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Yan yana 2 eşit sütun */
+    gap: 15px; /* Kartlar arası boşluk */
+    max-width: 1000px; /* Ekranı çok kaplamasın diye sınır */
+    margin: 20px auto; /* Sayfayı ortalar */
+    padding: 0 10px;
+}
+
+/* Kartın Genel Yapısı */
+.league-card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9; /* Fotoğrafın tam sığması için ideal oran */
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease;
+}
+
+.league-card:hover {
+    transform: scale(1.03); /* Üzerine gelince hafif büyüme */
+}
+
+/* Sağ Üst Yuvarlak Logo */
+.league-logo {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 35px;
+    height: 35px;
+    background: rgba(255, 255, 255, 0.9); /* Logonun arkası aydınlık olsun */
+    border-radius: 50%;
+    padding: 5px;
+    object-fit: contain;
+    z-index: 5;
+}
+
+/* Alt Karartma (Overlay) */
+.league-card .overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50%; /* Sadece alt yarıda karartma */
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+    display: flex;
+    align-items: flex-end; /* Yazıyı en alta yasla */
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+/* Lig İsmi */
+.league-card span {
+    color: white;
+    font-size: clamp(14px, 4vw, 18px); /* Yazıyı ekran boyutuna göre ayarlar */
+    font-weight: bold;
+    font-family: sans-serif;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Mobil Ayarı: Telefonlarda tek sütun olsun */
+@media (max-width: 600px) {
+    .league-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Genel Konteyner */
+.detail-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 0 15px;
+}
+
+/* Başlık ve Seçenek Satırı */
+.detail-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background: #1a202c;
+    padding: 15px 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+#leagueTitle {
+    color: #fff;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Modern Dropdown */
+.modern-select {
+    background: #2d3748;
+    color: white;
+    border: 1px solid #4a5568;
+    padding: 8px 15px;
+    border-radius: 8px;
+    outline: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Tablo Kartı */
+.table-card {
+    background: #1a202c;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 15px rgba(0,0,0,0.4);
+}
+
+.puan-tablosu {
+    width: 100%;
+    border-collapse: collapse;
+    color: #e2e8f0;
+}
+
+.puan-tablosu thead {
+    background: #2d3748;
+}
+
+.puan-tablosu th {
+    padding: 15px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    color: #a0aec0;
+}
+
+.puan-tablosu td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #2d3748;
+    text-align: center;
+}
+
+/* İlk 4 Şampiyonlar Ligi Rengi */
+.puan-tablosu tbody tr:nth-child(-n+4) td:first-child {
+    border-left: 4px solid #4299e1;
+}
+
+/* Takım İsimleri */
+.puan-tablosu td:nth-child(2) {
+    font-weight: 600;
+    color: #fff;
+}
+
+/* Puan Sütunu Parlasın */
+.puan-tablosu td:last-child {
+    color: #48bb78;
+    font-weight: 800;
+    font-size: 1.1rem;
+}
+
+/* Satır Üzerine Gelince Renk Değişimi */
+.puan-tablosu tbody tr:hover {
+    background: #283141;
+    transition: 0.2s;
+}
+
+/* Geri Dön Butonu */
+.back-btn {
+    background: transparent;
+    color: #a0aec0;
+    border: 1px solid #4a5568;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    color: white;
+    background: #4a5568;
+}
+
+:root {
+    /* Karanlık Tema (Varsayılan) */
+    --bg-color: #1a202c;
+    --card-bg: #2d3748;
+    --text-color: #e2e8f0;
+    --table-header: #2d3748;
+    --border-color: #4a5568;
+}
+
+[data-theme="light"] {
+    /* Aydınlık Tema */
+    --bg-color: #f7fafc;
+    --card-bg: #ffffff;
+    --text-color: #2d3748;
+    --table-header: #edf2f7;
+    --border-color: #cbd5e0;
+}
+
+/* Mevcut stillerini bu değişkenlerle güncelle kanka */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background 0.3s, color 0.3s;
+}
+
+.table-card, .detail-header-row {
+    background-color: var(--card-bg);
+}
+
+.puan-tablosu thead {
+    background-color: var(--table-header);
+}
+
+.theme-btn {
+    background: var(--card-bg); /* Senin tanımladığın değişken */
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: 0.3s;
+    outline: none;
+}
+
+.theme-btn:hover {
+    transform: scale(1.1);
+}
+/* 1. RENK PALETİ VE GEÇİŞ AYARLARI */
+:root {
+    /* Dark Mode (Varsayılan) */
+    --bg-main: #0f172a;
+    --bg-card: #1e293b;
+    --text-main: #f8fafc;
+    --header-bg: rgba(15, 23, 42, 0.8);
+    --accent: #38bdf8;
+}
+
+[data-theme="light"] {
+    /* Light Mode (Bembeyaz ve Ferah) */
+    --bg-main: #ffffff;
+    --bg-card: #f1f5f9;
+    --text-main: #0f172a;
+    --header-bg: rgba(255, 255, 255, 0.8);
+    --accent: #0284c7;
+}
+
+/* 2. GLOBAL AYARLAR (KASILMAYI ÖNLER) */
+* {
+    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+/* 3. PROFESYONEL HEADER VE KARTLAR */
+.header {
+    background-color: var(--header-bg);
+    backdrop-filter: blur(10px); /* Cam efekti */
+    border-bottom: 1px solid var(--accent);
+}
+
+.league-card {
+    background-color: var(--bg-card) !important;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+[data-theme="light"] .league-card {
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* 4. O MEŞHUR DÖNEN BUTON */
+.theme-btn {
+    background: var(--bg-card);
+    color: var(--text-main);
+    border: 2px solid var(--accent);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.theme-btn:active {
+    transform: scale(0.9);
+}
+
+/* --- PROFESYONEL TEMA GEÇİŞ SİSTEMİ (EN SONA EKLE) --- */
+
+/* 1. Renk Değişkenlerini Zorla Tanımla */
+:root {
+    --bg-main: #1a202c !important;
+    --text-main: #ffffff !important;
+    --card-bg: #2d3748 !important;
+}
+
+[data-theme="light"] {
+    --bg-main: #ffffff !important;
+    --text-main: #1a202c !important;
+    --card-bg: #f1f5f9 !important;
+}
+
+/* 2. Tüm Arka Planları Değişkenlere Bağla */
+body, 
+.league-grid, 
+main, 
+#leagueSelectionScene, 
+#leagueDetailScene {
+    background-color: var(--bg-main) !important;
+    color: var(--text-main) !important;
+    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                color 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 3. Kartlar ve Header İçin Renk Ayarı */
+.header, 
+.league-card, 
+.table-card, 
+.detail-header-row {
+    background-color: var(--card-bg) !important;
+    color: var(--text-main) !important;
+    transition: all 0.4s ease !important;
+}
+
+/* 4. Butonun Dönüş Efekti */
+.theme-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+/* Yazıların Karışmaması İçin */
+h1, h2, h3, p, span, b, strong, a {
+    color: var(--text-main) !important;
+}
+
+/* --- AYDINLIK MOD FINAL DOKUNUŞU (CSS SONUNA EKLE) --- */
+
+/* 1. Aydınlık Modda Tüm Yazıları Koyu Yap */
+[data-theme="light"] body,
+[data-theme="light"] .puan-tablosu td,
+[data-theme="light"] .puan-tablosu th,
+[data-theme="light"] #leagueTitle,
+[data-theme="light"] .logo,
+[data-theme="light"] nav a {
+    color: #1a202c !important; /* Koyu lacivert/siyah */
+}
+
+/* 2. Tablodaki O, G, B, M Sayılarını Görünür Yap */
+[data-theme="light"] .puan-tablosu td {
+    color: #4a5568 !important; /* Sayılar için orta koyulukta gri */
+}
+
+/* 3. Takım İsimlerini Daha Belirgin Yap */
+[data-theme="light"] .puan-tablosu td strong {
+    color: #000000 !important;
+}
+
+/* 4. Kartların İçindeki Yazıları Koru (Kartlar resimli olduğu için beyaz kalmalı) */
+[data-theme="light"] .league-card .overlay span {
+    color: #ffffff !important;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+}
+
+/* 5. Geri Butonu ve Select Kutusu */
+[data-theme="light"] .back-btn, 
+[data-theme="light"] .modern-select {
+    color: #1a202c !important;
+    border-color: #cbd5e0 !important;
+    background-color: #ffffff !important;
+}
+
+/* 6. Header Linkleri (Aktif olmayanlar) */
+[data-theme="light"] nav a:not(.active) {
+    color: #4a5568 !important;
+}
+
+/* --- ARKA PLANDAKİ KARANLIĞI SİLME (FINAL) --- */
+
+/* 1. Tüm ana kapsayıcıların arka planını değişkene bağla */
+[data-theme="light"] body,
+[data-theme="light"] .league-grid,
+[data-theme="light"] main,
+[data-theme="light"] .standing-section,
+[data-theme="light"] .detail-container {
+    background-color: #ffffff !important; /* Bembeyaz yap */
+    background: #ffffff !important;      /* Bazı yerlerde background-image varsa onu da siler */
+}
+
+/* 2. Sayfanın en dışını da garantiye alalım */
+html[data-theme="light"] {
+    background-color: #ffffff !important;
+}
+
+/* 3. Görselde gördüğüm o lacivert boşluk muhtemelen ligler.css içindeki 
+   .league-grid kısmından geliyor. Onu şeffaf yapalım ki body'nin beyazı görünsün. */
+[data-theme="light"] .league-grid {
+    background-image: none !important;
+}
+
+/* Butonun ana stili */
+.theme-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 1px solid var(--accent); /* Daha önce tanımladığın renk */
+    background: var(--bg-card);
+    cursor: pointer;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    outline: none;
+}
+
+/* Dönüş Sınıfı */
+.rotating {
+    transform: rotate(360deg);
+}
+
+/* Sayfa geçişlerini yumuşatmak için body'ye ekle */
+body {
+    transition: background-color 0.4s ease, color 0.4s ease !important;
+}
+
+/* Resimli kartların arka planını zorla beyaz yap */
+[data-theme="light"] .league-grid, 
+[data-theme="light"] body {
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* --- MODERN NAVİGASYON LİNKLERİ --- */
+
+nav a {
+    text-decoration: none;
+    color: var(--text-main); /* Tanımladığımız değişkene bağladık */
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Profesyonel yumuşak geçiş */
+    display: inline-block;
+    position: relative;
+}
+
+/* Üstüne Gelince (Hover) Efekti */
+nav a:hover {
+    color: var(--accent); /* Daha önce tanımladığın o mavi/yeşil ton */
+    transform: scale(1.1); /* %10 oranında büyür */
+    background-color: rgba(255, 255, 255, 0.1); /* Hafif bir parlama */
+}
+
+/* Altına Şık Bir Çizgi Efekti (Opsiyonel ama çok prof durur) */
+nav a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 50%;
+    background-color: var(--accent);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+nav a:hover::after {
+    width: 70%; /* Üstüne gelince çizgi ortadan iki yana açılır */
+}
+
+/* Aktif Sayfa (Ligler) İçin Sabit Duruş */
+nav a.active {
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+}
+
+/* Aydınlık Modda Linklerin Rengini Zorla Koyu Yap */
+[data-theme="light"] nav a {
+    color: #1a202c !important;
+}
+
+[data-theme="light"] nav a:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}

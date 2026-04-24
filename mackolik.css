@@ -1,0 +1,981 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f3f4f6;
+  color: #1f2937;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.header {
+   background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.logo {
+  font-size: 2rem;
+  color: #111827;
+}
+
+.nav {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.nav-item {
+  text-decoration: none;
+  color: #374151;
+  background: #e5e7eb;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.nav-item:hover {
+  background: #d1d5db;
+  color: #111827;
+}
+
+.search {
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  outline: none;
+  min-width: 240px;
+  font-size: 1rem;
+}
+
+.search:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+#matches {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.match-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.match-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+}
+
+.match-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+  color: #111827;
+  line-height: 1.4;
+}
+
+.match-card p {
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: #2563eb;
+  margin-bottom: 8px;
+}
+
+.match-card span {
+  font-size: 0.95rem;
+  color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 16px;
+  }
+
+  .header {
+    align-items: stretch;
+  }
+
+  .nav {
+    width: 100%;
+  }
+
+  .search {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .logo {
+    font-size: 1.6rem;
+  }
+}
+body {
+   background: #f3f4f6;
+  color: #1f2937;
+}
+
+body.dark {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  color: #f1f5f9;
+}
+
+body.dark .match-card {
+  background: #1e293b;
+  color: #e5e7eb;
+}
+
+body.dark .header {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+body.dark .nav-item {
+  background: #334155;
+  color: #e5e7eb;
+}
+
+body.dark .search {
+  background: #1e293b;
+  color: white;
+  border: 1px solid #475569;
+}
+/* Arama kutusu ve sonuç listesi */
+.search-container {
+    position: relative;
+    margin-left: 20px;
+}
+
+.dropdown {
+    position: absolute;
+    top: 45px; /* Inputun hemen altına gelmesi için */
+    left: 0;
+    width: 100%;
+    background-color: var(--bg-color, white); /* Temaya göre değişsin */
+    color: var(--text-color, black);
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000; /* Maç kartlarının üstünde gözüksün */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.dropdown-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.dropdown-item:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}
+/* Arama kutusu ve sonuç listesi */
+.search-container {
+    position: relative;
+    margin-left: 20px;
+}
+
+.dropdown {
+    position: absolute;
+    top: 45px; /* Inputun hemen altına gelmesi için */
+    left: 0;
+    width: 100%;
+    background-color: var(--bg-color, white); /* Temaya göre değişsin */
+    color: var(--text-color, black);
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000; /* Maç kartlarının üstünde gözüksün */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.dropdown-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.dropdown-item:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}
+/* --- MAÇ KARTLARI TASARIMI --- */
+.match-card {
+  background-color: var(--bg-color, #ffffff); /* Karanlık moda uyumlu olması için */
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  text-align: center;
+}
+
+/* Ev sahibi, skor ve deplasmanı aynı hizada tutar */
+.match-teams {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* Takım ismi ve logosunu yan yana tutar */
+.team {
+  display: flex;
+  align-items: center;
+  width: 40%;
+}
+
+/* Ev sahibi takım elemanlarını sağa yaslar (İsim - Logo şeklinde) */
+.team.home {
+  justify-content: flex-end; 
+}
+
+/* Deplasman takım elemanlarını sola yaslar (Logo - İsim şeklinde) */
+.team.away {
+  justify-content: flex-start;
+}
+
+/* Logoların boyutunu kısıtlar (Bunu yazmazsan logolar devasa olur) */
+.team-logo {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  margin: 0 10px; /* Logo ile yazı arasındaki boşluk */
+}
+
+/* Takım isimleri */
+.team-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Skor kısmı (Ortada büyük durması için) */
+.score {
+  font-size: 20px;
+  font-weight: bold;
+  width: 20%;
+  text-align: center;
+}
+
+/* Dakika ve Lig ismi */
+.match-time {
+  font-size: 12px;
+  color: #888;
+  margin-top: 10px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+/* --- ARAMA KUTUSU VE AÇILIR LİSTE (DROPDOWN) TASARIMI --- */
+.search-container {
+    position: relative;
+    /* Menüde düzgün durması için biraz margin verebilirsin */
+    margin-left: 20px; 
+}
+
+#takim-ara {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+.dropdown {
+    position: absolute;
+    top: 40px; /* Arama kutusunun hemen altında açılması için */
+    left: 0;
+    width: 100%;
+    background-color: var(--bg-color, white);
+}
+/* --- TAKIM İSMİ VE LOGOSUNU YAN YANA TUTAR --- */
+.team {
+  display: flex;
+  align-items: center;
+  width: 40%;
+  overflow: hidden; /* Taşma durumunu kontrol et */
+}
+
+/* Ev sahibi takım elemanlarını sağa yaslar (İsim - Logo şeklinde) */
+.team.home {
+  justify-content: flex-end;
+}
+
+/* Deplasman takım elemanlarını sola yaslar (Logo - İsim şeklinde) */
+.team.away {
+  justify-content: flex-start;
+}
+
+/* --- TAKIM İSİMLERİ --- */
+.team-name {
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap; /* Metni tek satırda tutar */
+  overflow: hidden; /* Sığmayan kısmı gizler */
+  text-overflow: ellipsis; /* Sığmayan kısmın sonuna üç nokta ekler */
+  max-width: calc(100% - 40px); /* Maksimum genişlik (logo için boşluk bırakır) */
+}
+
+/* Logoların boyutunu kısıtlar (Bunu yazmazsan logolar devasa olur) */
+.team-logo {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  margin: 0 10px; /* Logo ile yazı arasındaki boşluk */
+  flex-shrink: 0; /* Logonun genişliğinin daralmasını engeller */
+}
+
+
+
+
+/* --- BÜTÜN MAÇLARI İÇİNDE TUTAN ANA KUTU (GRID YAPISI) --- */
+#matches {
+  display: grid;
+  /* Sihirli kod burası: Ekran genişliğine göre sığabildiği kadar kartı yan yana dizer. 
+     Geniş ekranda 3, ortada 2, telefonda 1 tane olur. */
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px; /* Kartların arasına yatayda ve dikeyde 20px boşluk bırakır */
+  padding: 20px; /* Kenarlardan biraz nefes aldırır */
+  max-width: 1200px; /* Sayfanın çok fazla kenarlarına yayılmasını engeller */
+  margin: 0 auto; /* Kutuyu sayfanın tam ortasına hizalar */
+}
+
+/* Önceden kartların altına boşluk vermiştik, artık Grid 'gap' ile bunu yapıyor. 
+   O yüzden match-card içindeki margin-bottom'ı ezmek için bunu ekliyoruz. */
+.match-card {
+  margin-bottom: 0 !important; 
+  height: 100%; /* İçerik az olsa da tüm kartların boyu eşit görünsün */
+}
+
+a {
+  transition: transform 0.2s ease; /* Büyüme efektini yumuşatır */
+}
+
+a:hover {
+  transform: scale(1.2); /* Üstüne gelince %20 büyür, çekilince kendi iner */
+}
+
+
+
+/* --- MAÇ DURUMU STİLLERİ --- */
+
+/* 1. Canlı Maçlar (Canlı ve Hareketli) */
+.match-card.live-now {
+    border-left: 5px solid #e74c3c; /* Sol tarafa canlı olduğunu belirten kırmızı bir şerit */
+    background-color: rgba(231, 76, 60, 0.05); /* Çok hafif kırmızımsı arka plan */
+}
+
+.live-now .match-time {
+    color: #e74c3c;
+    font-weight: bold;
+    text-transform: uppercase;
+    animation: blinker 1.5s linear infinite; /* Yanıp sönme efekti */
+}
+
+/* 2. Biten Maçlar (Sakin ve Gri) */
+.match-card.finished {
+    border-left: 5px solid #95a5a6;
+    opacity: 0.8; /* Biraz daha sönük görünsün */
+    filter: grayscale(30%); /* Logoları hafif grileştirir, bitmiş hissi verir */
+}
+
+.finished .match-time {
+    color: #7f8c8d;
+    font-weight: normal;
+}
+
+/* 3. Başlamayan Maçlar (Standart ve Temiz) */
+.match-card.upcoming {
+    border-left: 5px solid #3498db; /* Mavi şerit henüz başlamadığını temsil eder */
+}
+
+.upcoming .match-time {
+    color: #3498db;
+    font-size: 0.9rem;
+}
+
+/* --- ANİMASYON --- */
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
+
+/* --- KART GENEL DÜZENLEME (Eğer yoksa) --- */
+.match-card {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    background: #fff; /* Light mod için */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+/* Dark Mod Uyumu */
+body.dark .match-card {
+    background: #2c3e50;
+    color: white;
+}
+
+
+.modal {
+  display: none; /* Başlangıçta gizli */
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.7); /* Arka planı karart */
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 500px;
+  position: relative;
+}
+
+body.dark .modal-content { background-color: #1a1a1a; color: white; }
+
+.close-btn {
+  position: absolute;
+  right: 15px; top: 10px;
+  font-size: 28px; cursor: pointer;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+#statsPage {
+    display: none; /* Başlangıçta gizli */
+}
+
+.back-btn {
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.stats-header {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+body.dark .stats-header { background: #2c3e50; }
+
+.stat-comparison {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.stat-bar-container {
+    flex-grow: 1;
+    text-align: center;
+    margin: 0 15px;
+}
+
+.stat-label { font-size: 0.8rem; color: #7f8c8d; text-transform: uppercase; }
+
+/* İstatistik Sayfası Konteynırı */
+#statsPage {
+    display: none;
+    padding: 15px;
+    max-width: 600px;
+    margin: 0 auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Geri Butonu */
+.back-btn {
+    background-color: #34495e;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: 0.3s;
+}
+
+.back-btn:hover { background-color: #2c3e50; }
+
+/* İstatistik Satırı (Sihirli Kısım) */
+.stat-comparison {
+    display: flex;
+    justify-content: space-between; /* İki uca yasla */
+    align-items: center;
+    padding: 15px;
+    background: #fff;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Dark Mode Uyumu */
+body.dark .stat-comparison {
+    background: #2c3e50;
+    color: #ecf0f1;
+}
+
+/* Değerler (Sayılar) */
+.stat-value {
+    font-weight: bold;
+    font-size: 1.1rem;
+    width: 40px;
+    text-align: center;
+}
+
+/* Ortadaki Etiket (Shots on Goal vb.) */
+.stat-label {
+    flex: 1; /* Orta kısmı genişletir */
+    text-align: center;
+    color: #7f8c8d;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+body.dark .stat-label { color: #bdc3c7; }
+
+.header-teams {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px;
+}
+
+.header-team {
+    text-align: center;
+    flex: 1;
+}
+
+.header-team img {
+    margin-bottom: 5px;
+}
+
+.header-team p {
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.header-vs {
+    font-weight: bold;
+    color: #e74c3c;
+    font-size: 1.2rem;
+    padding: 0 15px;
+}
+
+/* --- ANA SAYFA MAÇ KARTLARI DÜZENİ --- */
+.match-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box; /* Padding'lerin taşmasını önler */
+}
+
+.match-teams {
+    display: flex;
+    justify-content: space-between; /* Takımları iki uca yaslar, skoru ortalar */
+    align-items: center;
+    width: 100%;
+    padding: 10px 0;
+}
+
+.team {
+    display: flex;
+    align-items: center;
+    flex: 1; /* Ev sahibi ve deplasman eşit alan kaplar */
+    gap: 12px;
+}
+
+.team.home {
+    flex-direction: row; /* Yazı - Logo sıralaması */
+    justify-content: flex-end;
+}
+
+.team.away {
+    flex-direction: row-reverse; /* Logo - Yazı sıralaması */
+    justify-content: flex-end;
+}
+
+.team-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap; /* İsimlerin alt satıra geçmesini önler */
+}
+
+.score {
+    min-width: 80px;
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #2c3e50;
+}
+
+body.dark .score { color: #fff; }
+
+/* --- İSTATİSTİK SAYFASI ÖZEL DÜZENİ --- */
+.header-score {
+    font-size: 2.5rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.vs-text {
+    font-size: 1rem;
+    color: #e74c3c;
+    opacity: 0.7;
+}
+
+/* Mobilde isimler çok uzunsa taşmasın */
+@media (max-width: 480px) {
+    .team-name { font-size: 0.8rem; }
+    .score { min-width: 50px; font-size: 1.1rem; }
+}
+
+/* Maçların dizildiği ana konteynır */
+#matches {
+    display: grid;
+    /* Ekran genişliğine göre otomatik sığdır: her kutu en az 300px olsun */
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+    gap: 20px; /* Maç kartları arasındaki boşluk */
+    padding: 20px;
+}
+
+/* Maç Kartı Düzenlemeleri */
+.match-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease;
+    border: 1px solid #eee;
+    height: 100%; /* Kartların boyunu eşitle */
+}
+
+/* Üstüne gelince hafif büyüme efekti (Şık durur) */
+.match-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+/* Takımların Yan Yana Dizilimi */
+.match-teams {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+/* Takım Blokları (Yazı ve Logo Alt Alta) */
+.team {
+    display: flex;
+    flex-direction: column; /* Logoları ismin üstüne koymak daha modern durur 3'lü yapıda */
+    align-items: center;
+    flex: 1;
+    text-align: center;
+    gap: 5px;
+}
+
+.team-name {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #333;
+    max-width: 100px; /* Çok uzun isimler kartı patlatmasın */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.team-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.score {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #2c3e50;
+    padding: 0 10px;
+}
+
+body.dark .match-card {
+    background: #2c3e50;
+    border-color: #34495e;
+}
+
+body.dark .team-name { color: #ecf0f1; }
+body.dark .score { color: #fff; }
+
+/* Canlı maçlar için kırmızı ve yanıp sönme efekti */
+.live-now {
+    color: #ff0000 !important;
+    font-weight: bold;
+    animation: yanipSon 2s infinite;
+}
+
+@keyframes yanipSon {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; } /* Çok gitmiyor, hala okunabilir */
+    100% { opacity: 1; }
+}
+
+/* Biten maçlar için gri renk */
+.finished {
+    color: #888 !important;
+}
+
+/* Gelecek maçlar için koyu mavi/siyah */
+.upcoming {
+    color: #222;
+}
+
+.dropdown {
+    position: absolute;
+    background: white;
+    width: 100%;
+    z-index: 1000; /* Maç kartlarının üstünde kalması için */
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+}
+.dropdown-item {
+    padding: 10px;
+    cursor: pointer;
+}
+.dropdown-item:hover {
+    background-color: #f0f0f0;
+}
+
+#themeToggle {
+    /* Temel Şekil ve Boyut */
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 2px solid #e2e8f0;
+    
+    /* İçerik Hizalama (Emoji için) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    
+    /* Arka Plan ve Renkler */
+    background: #ffffff;
+    cursor: pointer;
+    
+    /* Profesyonel Geçiş Efekti */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Üzerine Gelince (Hover) */
+#themeToggle:hover {
+    transform: rotate(360deg) scale(1.1); /* Kendi etrafında dönerken hafif büyür */
+    border-color: #3b82f6;
+    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+}
+
+/* Tıklayınca Basılma Hissi */
+#themeToggle:active {
+    transform: scale(0.9);
+}
+
+/* --- KARANLIK MOD AYARLARI --- */
+/* Body 'dark' class'ına sahipken butonun alacağı hal */
+body.dark #themeToggle {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f1f5f9;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+body.dark #themeToggle:hover {
+    border-color: #fbbf24; /* Güneş rengine yakın bir sarı */
+    box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+}
+
+/* Eğer CSS'inde yoksa bunu ekle */
+.live-now {
+    color: #e74c3c;
+    animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+    50% { opacity: 0; }
+}
+
+/* --- KARANLIK MOD (DARK MODE) MAÇ DETAY KUTULARI DÜZELTMESİ --- */
+
+/* 1. Ana Kutuların Arka Planı ve Yazı Rengi */
+body.dark .mac-kutusu {
+    background-color: #1e293b !important; 
+    color: #f1f5f9 !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid #334155 !important;
+}
+
+/* 2. Tepedeki Skor Kutusunun Arka Planı */
+body.dark .header-score {
+    background-color: #0f172a !important;
+    color: #f1f5f9 !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5) !important;
+}
+
+/* 3. Başlıkların (Maç İstatistikleri / Maç Olayları) Altındaki Çizgi */
+body.dark .mac-kutusu h3 {
+    border-bottom-color: #334155 !important;
+}
+
+/* 4. Maç Olaylarındaki Ayırıcı Çizgileri Koyu Yapma */
+body.dark div[style*="border-bottom: 1px solid #f9f9f9"] {
+    border-bottom-color: #334155 !important;
+}
+
+/* 5. Ortadaki İstatistik İsimleri (Korner, Şut vs.) Daha Okunur Olsun */
+body.dark .mac-kutusu span[style*="color:#7f8c8d"] {
+    color: #94a3b8 !important;
+}
+
+/* --- KARANLIK MOD (DARK MODE) GERİ BUTONU DÜZELTMESİ --- */
+body.dark #btnGeri {
+    background-color: #334155 !important; /* Koyu lacivert/gri arkaplan */
+    color: #f1f5f9 !important; /* Açık renk yazı */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important; /* Hafif gece gölgesi */
+    transition: all 0.3s ease !important;
+}
+
+body.dark #btnGeri:hover {
+    background-color: #475569 !important; /* Üzerine gelince bir tık parlasın */
+    color: #ffffff !important;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5) !important;
+    transform: translateY(-2px) !important; /* Üstüne gelince hafif havaya kalksın */
+}
+
+/* --- DAHA GÖRÜNÜR KARANLIK MOD GERİ BUTONU --- */
+body.dark #btnGeri {
+    background-color: #2563eb !important; /* Canlı bir mavi (Primary Blue) */
+    color: #ffffff !important; /* Saf beyaz yazı */
+    font-weight: 800 !important; /* Yazıyı kalınlaştırdık */
+    border: 1px solid #3b82f6 !important; /* Hafif bir kenarlık */
+    padding: 12px 24px !important;
+    font-size: 15px !important;
+    letter-spacing: 0.5px !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important; /* Mavi gölge */
+    opacity: 1 !important; /* Transparanlığı tamamen kaldırdık */
+}
+
+body.dark #btnGeri:hover {
+    background-color: #1d4ed8 !important; /* Üzerine gelince biraz daha koyu mavi */
+    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.6) !important;
+    transform: scale(1.05) !important; /* Hafif büyüme efekti */
+}
+
+/* --- MERMİ GİBİ GÖRÜNÜR GERİ BUTONU --- */
+body.dark #btnGeri {
+    background-color: #2563eb !important; /* Canlı mavi - Görünürlük için şart */
+    color: #ffffff !important; /* Saf beyaz yazı */
+    border: none !important;
+    padding: 12px 28px !important;
+    font-size: 16px !important;
+    font-weight: 800 !important; /* Yazıyı iyice kalınlaştırdık */
+    border-radius: 10px !important;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.5) !important; /* Mavi parlama efekti */
+    cursor: pointer !important;
+    display: block !important;
+    margin: 0 auto 20px auto !important;
+    transition: all 0.2s ease-in-out !important;
+    opacity: 1 !important; /* Şeffaflık varsa tamamen kapatır */
+}
+
+body.dark #btnGeri:hover {
+    background-color: #1d4ed8 !important; /* Üzerine gelince bir tık koyu mavi */
+    transform: translateY(-3px) scale(1.03) !important; /* Hafif zıplama efekti */
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.7) !important;
+}
+
+/* Mobilde de cam gibi görünsün */
+@media (max-width: 480px) {
+    body.dark #btnGeri {
+        width: 80% !important; /* Telefondaysa butonu biraz büyütür */
+        font-size: 15px !important;
+    }
+}
+
+/* --- HEM AYDINLIK HEM KARANLIK MOD İÇİN GÖRÜNÜR GERİ BUTONU --- */
+
+/* 1. Aydınlık Mod (Normal) Hali */
+#btnGeri {
+    background-color: #1a252f !important; /* Koyu lacivert (Çok net görünür) */
+    color: #ffffff !important; /* Saf beyaz yazı */
+    border: none !important;
+    padding: 12px 28px !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    display: block !important;
+    margin: 0 auto 20px auto !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.2s ease !important;
+}
+
+#btnGeri:hover {
+    background-color: #2c3e50 !important;
+    transform: translateY(-2px) !important;
+}
+
+/* 2. Karanlık Mod (Dark) Hali */
+body.dark #btnGeri {
+    background-color: #2563eb !important; /* Parlak mavi */
+    color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4) !important;
+}
+
+body.dark #btnGeri:hover {
+    background-color: #1d4ed8 !important;
+}

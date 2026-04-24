@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Score</title>
+    <link rel="stylesheet" href="mackolik.css">
+    
+    <style>
+        .mac-kutusu {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        /* Eğer karanlık tema (dark mode) varsa kutular siyah kalsın istersen burayı ona göre ayarlarsın */
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1 class="logo">Live Score</h1>
+        <button id="themeToggle">🌙</button>
+        <nav class="nav">
+            <a class="nav-item" data-type="live" href="#">Canlı</a>
+            <a class="nav-item" data-type="today" href="#">Bugün</a>
+            <a class="nav-item" data-type="league" href="#">Ligler</a>
+        </nav>
+        <div class="search-container">
+      <input type="text" id="takim-ara" placeholder="Takım ara...">
+            <div id="sonuclar" class="dropdown"></div>
+        </div>
+    </header>
+
+    <div id="matches"></div>
+
+    <div id="statsPage" style="display: none; padding: 20px;">
+        <button class="back-btn" id="btnGeri" style="display:block; margin: 0 auto 20px auto; padding: 10px 20px; border-radius: 8px; border: none; background: #eee; cursor:pointer;">
+            ⬅ Maç Listesine Dön
+        </button>
+        
+        <div id="selectedMatchHeader" class="mac-kutusu"></div>
+
+        <div id="statsList" class="mac-kutusu"></div>
+
+        <div id="eventsList" class="mac-kutusu"></div>
+    </div>
+
+    <script src="mackolik.js"></script>
+</body>
+</html>

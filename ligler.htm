@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ligler | Mini Maçkolik</title>
+    <link rel="stylesheet" href="mackolik.css"> <link rel="stylesheet" href="ligler.css">   </head>
+
+<body class="dark">
+    <header class="header">
+        <h1 class="logo" onclick="location.href='anasayfa.htm'">LiveScore</h1>
+        <nav>
+            <a href="anasayfa.htm">Anasayfa</a>
+           
+           <button id="theme-toggle" class="theme-btn">
+    <span id="theme-icon">☀️</span>
+</button>
+</button>
+        </nav>
+    </header>
+
+ <div id="leagueSelectionScene" class="league-grid">
+    <div class="league-card" onclick="selectLeague(203)" style="background-image: url('Gemini_Generated_Image_f0lwiqf0lwiqf0lw.png');">
+        <img src="super-lig-logo.png" class="league-logo">
+        <div class="overlay"><span>Trendyol Süper Lig</span></div>
+    </div>
+
+    <div class="league-card" onclick="selectLeague(39)" style="background-image: url('hq720.jpg');">
+        <img src="premier-league-logo.png" class="league-logo">
+        <div class="overlay"><span>Premier League</span></div>
+    </div>
+
+    <div class="league-card" onclick="selectLeague(140)" style="background-image: url('arda-guler546.webp');">
+        <img src="la-liga-logo.png" class="league-logo"> 
+        <div class="overlay"><span>La Liga</span></div>
+    </div>
+
+    <div class="league-card" onclick="selectLeague(135)" style="background-image: url('IMG_8571-scaled.jpeg');">
+        <img src="serie-a-logo.png" class="league-logo">
+        <div class="overlay"><span>Serie A</span></div>
+    </div>
+
+    <div class="league-card" onclick="selectLeague(78)" style="background-image: url('kapak_102007.jpg');">
+        <img src="bundesliga-logo.png" class="league-logo">
+        <div class="overlay"><span>Bundesliga</span></div>
+    </div>
+
+    <div class="league-card" onclick="selectLeague(61)" style="background-image: url('Ousmane-Dembele1-1024x576.webp');">
+        <img src="ligue1-logo.png" class="league-logo">
+        <div class="overlay"><span>Ligue 1</span></div>
+    </div>
+</div>
+    
+<div id="leagueDetailScene" class="standing-section" style="display: none;">
+    <div class="detail-container">
+        <div class="detail-header-row">
+            <button onclick="backToLeagues()" class="back-btn">← Geri</button>
+            <h2 id="leagueTitle">Premier League</h2>
+            <div class="custom-select-wrapper">
+                <select id="seasonSelect" onchange="changeSeason()" class="modern-select">
+                    <option value="2025">2025-2026</option>
+                    <option value="2024" selected>2024-2025</option>
+                    <option value="2023">2023-2024</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="tab-menu" style="display: flex; gap: 10px; margin-bottom: 20px; justify-content: center;">
+            <button id="btnStandings" onclick="switchTab('standings')" style="padding: 10px 20px; cursor: pointer; background: #00ff00; color: #000; border: none; font-weight: bold; border-radius: 5px;">Puan Durumu</button>
+            <button id="btnFixtures" onclick="switchTab('fixtures')" style="padding: 10px 20px; cursor: pointer; background: #333; color: #fff; border: none; font-weight: bold; border-radius: 5px;">Fikstür</button>
+        </div>
+
+        <div id="standingsView" class="table-card">
+            <table class="puan-tablosu">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th style="text-align:left">Takım</th>
+                        <th>O</th><th>G</th><th>B</th><th>M</th><th>P</th>
+                    </tr>
+                </thead>
+                <tbody id="standingBody"></tbody>
+            </table>
+        </div>
+
+        <div id="fixturesView" class="table-card" style="display: none;">
+            <div class="week-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #222; padding: 10px; border-radius: 8px;">
+                <button onclick="changeWeek(-1)" style="padding: 5px 15px; cursor: pointer; border:none; border-radius: 5px;">◀ Önceki</button>
+                <h3 id="currentWeekDisplay" style="margin: 0; color: #fff;">1. Hafta</h3>
+                <button onclick="changeWeek(1)" style="padding: 5px 15px; cursor: pointer; border:none; border-radius: 5px;">Sonraki ▶</button>
+            </div>
+            <div id="fixtureList" style="display: flex; flex-direction: column; gap: 10px;">
+                </div>
+        </div>
+
+    </div>
+</div>
+
+       
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="ligler.js"></script>
+</body>
+</html>
