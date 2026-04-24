@@ -1,0 +1,14 @@
+name: Mac Guncelleme Cron
+on:
+  schedule:
+    - cron: '*/15 12-23 * * *' # Her gün 12:00-23:45 arası her 15 dakikada bir çalışır
+  workflow_dispatch: # Manuel çalıştırmak için buton ekler
+
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vercel API Tetikle
+        run: |
+          curl -X GET "https://soccer2-ashen.vercel.app/api/fetch-matches" \
+          -H "Authorization: Bearer merT190752!"
