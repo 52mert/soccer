@@ -1,5 +1,8 @@
-// 1. ELEMANLARI SEÇELİM
-// 1. DEĞİŞKENLERİ TANIMLAMA
+// 1. SUPABASE BAĞLANTI BİLGİLERİ (GÜVENLİ)
+const SUPABASE_URL = "https://xozwjuudbypmqewncdoo.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_XeQN6Ha9dWfJ_SqjLUsx9A_DM-8ld4k"; // Supabase Settings -> API kısmından al
+
+// 2. ELEMANLARI SEÇELİM
 const matchesDiv = document.getElementById("matches"); 
 const statsPage = document.getElementById("statsPage");
 const navItems = document.querySelectorAll(".nav-item");
@@ -10,11 +13,10 @@ const sonuclarDiv = document.getElementById("sonuclar");
 let tumMaclar = []; 
 let gonderilcekMaclar= [];
 
-// 2. TIKLAMA OLAYLARI (Üst Menü)
+// 3. TIKLAMA OLAYLARI (Üst Menü)
 navItems.forEach(item => {
     item.addEventListener("click", e => {
         e.preventDefault();
-        
         if (item.dataset.type === "league") {
             window.location.href = 'ligler.htm';
         } else {
@@ -23,44 +25,39 @@ navItems.forEach(item => {
     });
 });
 
-// 3. VERİ ÇEKME VE FİLTRELEME (GET MATCHES)
+// 4. SUPABASE'DEN VERİ ÇEKME (GET MATCHES)
 async function getMatches(type) {
-    const API_KEY = "148629adfebedb4763c60d328dbccd88";
-    
-    // Güvenlik kontrolü: HTML elemanları DOM'da var mı?
     if (!matchesDiv || !statsPage) {
-        console.error("Hata: 'matches' veya 'statsPage' ID'li elemanlar DOM'da bulunamadı.");
+        console.error("Hata: Gerekli HTML elemanları DOM'da bulunamadı.");
         return;
     }
 
-    // Sayfa geçişini ayarla
     matchesDiv.style.display = "block";
     statsPage.style.display = "none";
 
     try {
-        matchesDiv.innerHTML = "<div class='loading'>Maçlar yükleniyor...</div>";
+        matchesDiv.innerHTML = "<div class='loading'>Aga-Scorer Verileri Yükleniyor...</div>";
 
-        // API-Football URL'sini belirliyoruz
-        let url = "https://v3.football.api-sports.io/fixtures?date=" + new Date().toISOString().split('T')[0];
-        if (type === "live") {
-            url = "https://v3.football.api-sports.io/fixtures?live=all";
-        }
+        // Supabase'deki 'matches' tablosundan tüm verileri çek
+        let url = `${SUPABASE_URL}/rest/v1/matches?select=*`;
 
+        // İstek atıyoruz (Artık API-Sports'a değil, kendi veritabanımıza!)
         const res = await fetch(url, {
             method: "GET",
             headers: {
-                "x-rapidapi-key": API_KEY,
-                "x-rapidapi-host": "v3.football.api-sports.io"
+                "apikey": SUPABASE_ANON_KEY,
+                "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+                "Content-Type": "application/json"
             }
         });
 
-        if (!res.ok) throw new Error("API bağlantısı kurulamadı!");
+        if (!res.ok) throw new Error("Veritabanına bağlanılamadı!");
 
-        const json = await res.json();
+        const data = await res.json();
         
-        // API-Football veriyi json.response içinde döndürür
-        if (json.response && json.response.length > 0) {
-            showMatches(json.response);
+        if (data && data.length > 0) {
+            // İstersen burada 'type' (live, today) durumuna göre data üzerinde filtreleme de yapabilirsin
+            showMatches(data);
         } else {
             matchesDiv.innerHTML = "<div class='no-match'>Görüntülenecek maç bulunamadı.</div>";
         }
@@ -70,47 +67,36 @@ async function getMatches(type) {
         matchesDiv.innerHTML = `<div class='error'>Hata: ${err.message}</div>`;
     }
 }
-// 4. EKRANA BASMA (SHOW MATCHES)
+
+// 5. EKRANA BASMA (SHOW MATCHES) - Veritabanı şemasına göre uyarlandı!
 function showMatches(matches) {
-    // HTML'deki ID 'matches' olduğu için onu doğru şekilde yakalıyoruz
     const container = document.getElementById("matches");
-    
-    if (!container) {
-        console.error("Hata: 'matches' ID'li div bulunamadı! HTML dosyanı kontrol et.");
-        return;
-    }
+    if (!container) return;
 
-    // Arama özelliği için gelen veriyi global değişkene yedekliyoruz
     tumMaclar = matches;
-
-    container.innerHTML = ""; // İçeriyi temizle
+    container.innerHTML = ""; 
 
     matches.forEach(match => {
-        // API-Football Yapısı
-        const homeTeam = match.teams.home.name;
-        const awayTeam = match.teams.away.name;
-        const homeLogo = match.teams.home.logo;
-        const awayLogo = match.teams.away.logo;
-
-        // Skorlar
-        const homeScore = match.goals.home ?? 0;
-        const awayScore = match.goals.away ?? 0;
-
-        const statusShort = match.fixture.status.short;
-        const elapsed = match.fixture.status.elapsed;
+        // Artık veriler Supabase tablosundaki sütun adlarıyla geliyor
+        const homeTeam = match.home_team_name;
+        const awayTeam = match.away_team_name;
+        const homeLogo = match.home_team_logo;
+        const awayLogo = match.away_team_logo;
+        const homeScore = match.home_score ?? 0;
+        const awayScore = match.away_score ?? 0;
+        const statusShort = match.status;
         
         let zamanClass2 = "";
         let zamanBilgisi = "";
 
-        // Zaman Durumu Hesaplama
         if (["FT", "AET", "PEN"].includes(statusShort)) {
             zamanBilgisi = "MS";
             zamanClass2 = "finished";
         } else if (["1H", "2H", "HT", "ET", "P"].includes(statusShort)) {
-            zamanBilgisi = (statusShort === "HT") ? "DA" : `${elapsed}'`; 
+            zamanBilgisi = (statusShort === "HT") ? "DA" : "Canlı"; // Backend süreyi tutmadığı için direkt canlı yazıyoruz
             zamanClass2 = "live-now";
         } else {
-            const matchDate = new Date(match.fixture.date);
+            const matchDate = new Date(match.match_date);
             zamanBilgisi = matchDate.getHours().toString().padStart(2, '0') + ":" + 
                            matchDate.getMinutes().toString().padStart(2, '0');
             zamanClass2 = "upcoming";
@@ -135,63 +121,51 @@ function showMatches(matches) {
             <div class="match-time ${zamanClass2}">${zamanBilgisi}</div>
         `;
 
-        // Tıklanınca detay sayfasına git
+        // Tıklanınca o maçın ID'sini localStatistics'e yolla
         card.addEventListener("click", () => {
-            localStatistics(match.fixture.id);
+            localStatistics(match.id);
         });
 
         container.appendChild(card);
     });
 }
-// İstatistikler liste isteğinde gelmediği için, tıklandığında maça özel fetch atıyoruz
+
+// 6. MAÇ DETAYLARI (İSTATİSTİK VE OLAYLAR) - Supabase'den tek maç çeker
 async function localStatistics(matchId) {
-    const API_KEY = "148629adfebedb4763c60d328dbccd88";
-    
-    // HTML'deki doğru ID 'matches' olduğu için onu yakalıyoruz
     const matchesContainer = document.getElementById("matches");
     const statsPage = document.getElementById("statsPage");
     const header = document.getElementById("selectedMatchHeader");
     const statsList = document.getElementById("statsList");
     const eventsList = document.getElementById("eventsList");
 
-    // Güvenlik kontrolü
-    if (!matchesContainer || !statsPage) {
-        console.error("Hata: Gerekli HTML elemanları (matches veya statsPage) bulunamadı!");
-        return;
-    }
-
-    // Sayfa geçişini yap
     matchesContainer.style.display = "none";
     statsPage.style.display = "block";
 
-    // Yükleniyor mesajı
     header.innerHTML = "<div style='text-align:center; padding:20px; font-weight:bold;'>Maç detayları yükleniyor...</div>";
     statsList.innerHTML = "";
     eventsList.innerHTML = "";
 
     try {
-        const res = await fetch(`https://v3.football.api-sports.io/fixtures?id=${matchId}`, {
+        // Supabase'den sadece tıklanan maçın ID'sine göre veri çekiyoruz
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/matches?id=eq.${matchId}&select=*`, {
             method: "GET",
             headers: {
-                "x-rapidapi-key": API_KEY,
-                "x-rapidapi-host": "v3.football.api-sports.io"
+                "apikey": SUPABASE_ANON_KEY,
+                "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
             }
         });
         
-        const json = await res.json();
-        const match = json.response[0];
+        const data = await res.json();
+        const match = data[0]; // Gelen dizinin ilk ve tek elemanı
 
         if (!match) {
             header.innerHTML = "<div style='text-align:center; color:red;'>Maç detayı bulunamadı.</div>";
             return;
         }
 
-        const homeTeamObj = match.teams.home; 
-        const awayTeamObj = match.teams.away;
-        const homeScore = match.goals.home ?? 0;
-        const awayScore = match.goals.away ?? 0;
-        const statusShort = match.fixture.status.short;
-        const elapsed = match.fixture.status.elapsed;
+        const homeScore = match.home_score ?? 0;
+        const awayScore = match.away_score ?? 0;
+        const statusShort = match.status;
 
         let zamanBilgisi = "Başlamadı";
         let zamanClassDetay = "";
@@ -199,11 +173,10 @@ async function localStatistics(matchId) {
         if (["FT", "AET", "PEN"].includes(statusShort)) {
             zamanBilgisi = "MS";
         } else if (["1H", "2H", "HT", "ET", "P"].includes(statusShort)) {
-            const displayMin = statusShort === "HT" ? "DA" : `${elapsed}'`;
-            zamanBilgisi = `<span style="color:#27ae60;">${displayMin} Canlı</span>`;
+            zamanBilgisi = `<span style="color:#27ae60;">${statusShort === "HT" ? "DA" : "Canlı"}</span>`;
             zamanClassDetay = "live-now";
         } else {
-            const matchDate = new Date(match.fixture.date);
+            const matchDate = new Date(match.match_date);
             zamanBilgisi = matchDate.getHours().toString().padStart(2, '0') + ":" + matchDate.getMinutes().toString().padStart(2, '0');
         }
 
@@ -214,8 +187,8 @@ async function localStatistics(matchId) {
             </div>
             <div class="header-teams" style="display:flex; justify-content:space-around; align-items:center;">
                 <div class="header-team" style="text-align:center;">
-                    <img src="${homeTeamObj.logo}" width="60" style="border-radius:50%;">
-                    <p style="margin-top:10px; font-weight:bold;">${homeTeamObj.name}</p>
+                    <img src="${match.home_team_logo}" width="60" style="border-radius:50%;">
+                    <p style="margin-top:10px; font-weight:bold;">${match.home_team_name}</p>
                 </div>
                 <div class="header-score-container">
                     <div class="header-score" style="font-size: 36px; font-weight: bold; background: #f8f9fa; padding: 10px 30px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
@@ -223,8 +196,8 @@ async function localStatistics(matchId) {
                     </div>
                 </div>
                 <div class="header-team" style="text-align:center;">
-                    <img src="${awayTeamObj.logo}" width="60" style="border-radius:50%;">
-                    <p style="margin-top:10px; font-weight:bold;">${awayTeamObj.name}</p>
+                    <img src="${match.away_team_logo}" width="60" style="border-radius:50%;">
+                    <p style="margin-top:10px; font-weight:bold;">${match.away_team_name}</p>
                 </div>
             </div>`;
 
@@ -238,9 +211,9 @@ async function localStatistics(matchId) {
             "Goalkeeper Saves": "Kaleci Kurtarışı", "Total passes": "Toplam Pas", "Passes accurate": "İsabetli Pas", "Passes %": "Pas Başarısı (%)"
         };
 
-        if (match.statistics && match.statistics.length === 2) {
-            const homeStats = match.statistics[0].statistics;
-            const awayStats = match.statistics[1].statistics;
+        if (match.stats && match.stats.length === 2) {
+            const homeStats = match.stats[0].statistics;
+            const awayStats = match.stats[1].statistics;
 
             homeStats.forEach(stat => {
                 const hValRaw = stat.value;
@@ -275,7 +248,7 @@ async function localStatistics(matchId) {
                     </div>`;
             });
         } else {
-            statsList.innerHTML += "<div class='no-data' style='color:#7f8c8d; text-align:center;'>İstatistik verisi bulunamadı.</div>";
+            statsList.innerHTML += "<div class='no-data' style='color:#7f8c8d; text-align:center;'>Bu maç için istatistik bulunmuyor.</div>";
         }
 
         // --- OLAYLAR ---
@@ -285,7 +258,7 @@ async function localStatistics(matchId) {
             const tumOlaylar = [...match.events].sort((a, b) => a.time.elapsed - b.time.elapsed);
 
             tumOlaylar.forEach(event => {
-                const isHome = event.team.id === homeTeamObj.id;
+                const isHome = event.team.id === match.home_team_id;
                 const flexDir = isHome ? "row" : "row-reverse";
                 const textAlign = isHome ? "left" : "right";
 
@@ -330,44 +303,36 @@ async function localStatistics(matchId) {
         matchesContainer.style.display = "block";
     };
 }
-// 6. YARDIMCI FONKSİYONLAR
 
-
-// Arama fonksiyonu (Global listeyi filtreler)
+// 7. ARAMA FONKSİYONU
 function filtrele() {
     const searchInput = document.getElementById("takim-ara");
     const arananKelime = searchInput.value.toLowerCase().trim();
     
-    // Eğer kutu boşsa tüm ana listeyi geri getir
     if (arananKelime.length === 0) {
         showMatches(tumMaclar);
         return;
     }
 
-    // Arama sadece 2 harften fazlaysa başlasın (performans için)
     if (arananKelime.length < 2) return;
 
     const bulunanlar = tumMaclar.filter(match => {
-        // API-Football'da takım isimleri bu yollarda bulunur:
-        const homeName = match.teams.home.name.toLowerCase();
-        const awayName = match.teams.away.name.toLowerCase();
-        const leagueName = match.league.name.toLowerCase(); // Ekstra: Lig adına göre de aratabilirsin
+        // Artık isimleri DB formatında kontrol ediyoruz
+        const homeName = (match.home_team_name || "").toLowerCase();
+        const awayName = (match.away_team_name || "").toLowerCase();
 
-        // Aranan kelime ev sahibi, deplasman veya lig adında geçiyor mu?
-        return homeName.includes(arananKelime) || 
-               awayName.includes(arananKelime) || 
-               leagueName.includes(arananKelime);
+        return homeName.includes(arananKelime) || awayName.includes(arananKelime);
     });
 
     showMatches(bulunanlar);
 }
 
-// Input alanına her yazı yazıldığında çalışması için listener
 const searchInputEl = document.getElementById("takim-ara");
 if (searchInputEl) {
     searchInputEl.addEventListener("input", filtrele);
 }
-// 7. TEMA VE DİNLEYİCİLER
+
+// 8. TEMA VE BAŞLANGIÇ
 themeBtn.addEventListener("click", () => {
     document.body.classList.toggle("dark");
     const isDark = document.body.classList.contains("dark");
@@ -375,12 +340,10 @@ themeBtn.addEventListener("click", () => {
     themeBtn.textContent = isDark ? "🔆" : "🌙";
 });
 
-
-
 if (localStorage.getItem("theme") === "dark") {
     document.body.classList.add("dark");
     themeBtn.textContent = "🔆";
 }
 
-// Başlangıçta verileri çek
+// Sistemi Başlat
 getMatches("today");
