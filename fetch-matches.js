@@ -6,16 +6,15 @@ const API_KEY = process.env.API_SPORTS_KEY;
 const CRON_SECRET = process.env.CRON_SECRET;
 
 export default async function handler(req, res) {
-    // 1. GÜVENLİK KONTROLÜ
     if (req.headers.authorization !== `Bearer ${CRON_SECRET}`) {
         return res.status(401).json({ error: 'Yetkisiz erişim' });
     }
 
     try {
-        // Türkiye saatine göre bugünün tarihini alıyoruz (Gece sarkan maçlar için kritik)
+        // Türkiye saati ile bugünü alıyoruz
         const todayStr = new Date().toLocaleString("en-CA", {timeZone: "Europe/Istanbul"}).split(',')[0];
         
-        // API'ye İstek (Saat dilimini belirterek)
+        // DİKKAT: Senin uyarınla sezon tekrar 2025 yapıldı!
         const response = await fetch(`https://v3.football.api-sports.io/fixtures?date=${todayStr}&season=2025&timezone=Europe/Istanbul`, {
             headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
         });
@@ -27,7 +26,6 @@ export default async function handler(req, res) {
         }
 
         // --- BÖLÜM A: GÜNLÜK VİTRİN (daily_matches) SIFIRLAMASI ---
-        // Sadece bugünden eski olan günlük maçları vitrinden sil
         await supabase.from('daily_matches').delete().lt('match_date', todayStr + 'T00:00:00Z');
 
         const vitrinData = allMatches.map(m => ({
@@ -44,22 +42,25 @@ export default async function handler(req, res) {
         }));
         await supabase.from('daily_matches').upsert(vitrinData);
 
-        // --- BÖLÜM B: ANA DEPO (matches) NOKTA ATIŞI GÜNCELLEME ---
-        // DİKKAT: Artık Upsert yok! Sadece UPDATE var. Tarihlerin ve logoların güvende.
+        // --- BÖLÜM B: ANA DEPO (matches) İSME GÖRE GÜNCELLEME ---
         const superLigMatches = allMatches.filter(m => m.league.id === 203);
         
         for (const m of superLigMatches) {
-            // Sadece maç oynanıyorsa VEYA bittiyse (MS olduysa) güncelle.
+            // Canlıysa veya Maç Bitti (FT) ise güncelle
             const activeOrFinished = ['1H', '2H', 'HT', 'LIVE', 'ET', 'P', 'BT', 'FT', 'AET', 'PEN'];
             
             if (activeOrFinished.includes(m.fixture.status.short)) {
+                // Takım isimleriyle (ve 2025 sezonuyla) nokta atışı eşleştirme
                 await supabase.from('matches')
                     .update({ 
                         home_score: m.goals.home,
                         away_score: m.goals.away,
-                        status: m.fixture.status.short // Bu FT olduğunda son mühür vurulur!
+                        status: m.fixture.status.short 
                     })
-                    .eq('id', m.fixture.id); // Sadece ID'yi bul ve o satırı güncelle
+                    .eq('league_id', 203)
+                    .eq('season', '2025') // 2025 sezonunu garantiye alıyoruz
+                    .eq('home_team_name', m.teams.home.name)
+                    .eq('away_team_name', m.teams.away.name); 
             }
         }
 
@@ -78,8 +79,6 @@ export default async function handler(req, res) {
         const activeStatuses = ['1H', '2H', 'HT', 'LIVE', 'ET', 'P', 'BT'];
 
         for (const match of selectedMatches) {
-            // Sadece canlıysa kota harcayarak şut/korner detaylarını çekiyoruz. 
-            // Maç FT (MS) olduysa buraya girmez, kota harcanmaz!
             if (activeStatuses.includes(match.fixture.status.short)) {
                 const detailRes = await fetch(`https://v3.football.api-sports.io/fixtures?id=${match.fixture.id}`, {
                     headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
@@ -98,7 +97,7 @@ export default async function handler(req, res) {
             }
         }
 
-        return res.status(200).json({ message: "Skorlar güncellendi, MS (Maç Sonu) başarıyla mühürlendi!" });
+        return res.status(200).json({ message: "İsim eşleştirmesiyle 2025 skorları güncellendi, MS mühürlendi!" });
 
     } catch (err) {
         return res.status(500).json({ error: err.message });
