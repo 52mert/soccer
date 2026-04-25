@@ -61,9 +61,31 @@ export default async function handler(req, res) {
             m.league.id === 203
         );
 
+      // 👇 YENİ EKLENEN KISIM: İSİM ÇEVİRİ SÖZLÜĞÜ 👇
+        // Sol taraf: API-Football'un gönderdiği isim (daily_matches'ten bakabilirsin)
+        // Sağ taraf: Senin matches tablonda yazan isim
+        const takimSozlugu = {
+            "Rizespor": "Ç.Rizespor",
+            "Fenerbahce": "Fenerbahçe",       // Örnek: API'de ç yoktur, sende vardır
+            "Besiktas": "Beşiktaş",           // Örnek
+            "Gaziantep": "Gaziantep FK",      // Sen resimde Gaziantep FK yazmışsın, API Gaziantep diyebilir
+            "Istanbul Basaksehir": "Başakşehir", 
+            "Alanyaspor": "Corendon Alanyaspor" // Eğer sende sponsorlu isim varsa
+            // Uyuşmayan diğer takımlarını buraya aynı mantıkla ekle...
+        };
+
+        // Bu küçük fonksiyon, isim sözlükte varsa çevirir, yoksa (örn: Eyüpspor) aynen bırakır
+        const cevir = (apiIsmi) => takimSozlugu[apiIsmi] || apiIsmi; 
+        // 👆 YENİ EKLENEN KISIM BİTTİ 👆
+
+
         console.log(`5. Güncellenebilecek potansiyel bitmiş Süper Lig maçı sayısı: ${finishedSuperLigMatches.length}`);
 
         for (const m of finishedSuperLigMatches) {
+            // İsimleri veritabanında aramadan önce sözlükten geçiriyoruz
+            const dbHomeName = cevir(m.teams.home.name);
+            const dbAwayName = cevir(m.teams.away.name);
+
             await supabase
                 .from('matches')
                 .update({
@@ -71,12 +93,11 @@ export default async function handler(req, res) {
                     away_score: m.goals.away ?? 0,
                     status: m.fixture.status.short 
                 })
-             
-                .eq('league_id', 203)                       // Lig kesinlikle 203 olmalı
-                .eq('season', '2025')                       // Sezon 2025 olmalı
-                .eq('status', 'NS')                         // Veritabanında şu an oynanmamış (NS) görünmeli
-                .eq('home_team_name', m.teams.home.name)    // Ev sahibi adı API ile aynı olmalı
-                .eq('away_team_name', m.teams.away.name)    // Deplasman adı API ile aynı olmalı
+                .eq('league_id', 203)
+                .eq('season', '2025')
+                .eq('status', 'NS')
+                .eq('home_team_name', dbHomeName)  // Artık çevrilmiş ismi arıyoruz!
+                .eq('away_team_name', dbAwayName)  // Artık çevrilmiş ismi arıyoruz!
                 .throwOnError();
         }
 
