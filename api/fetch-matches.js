@@ -71,7 +71,7 @@ export default async function handler(req, res) {
                     away_score: m.goals.away ?? 0,
                     status: m.fixture.status.short 
                 })
-                .eq('id', m.fixture.id)                     // ID'ler aynı olmalı
+             
                 .eq('league_id', 203)                       // Lig kesinlikle 203 olmalı
                 .eq('season', '2025')                       // Sezon 2025 olmalı
                 .eq('status', 'NS')                         // Veritabanında şu an oynanmamış (NS) görünmeli
