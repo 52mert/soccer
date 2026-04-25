@@ -1,38 +1,41 @@
 import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
 
-// Çevresel değişkenlerden (Environment Variables) güvenli bağlantı anahtarlarını alıyoruz
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 const API_KEY = process.env.API_SPORTS_KEY; 
 const CRON_SECRET = process.env.CRON_SECRET;
 
 export default async function handler(req, res) {
-    // 1. GÜVENLİK KONTROLÜ: Sadece Cron Job bu endpoint'i tetikleyebilir
     if (req.headers.authorization !== `Bearer ${CRON_SECRET}`) {
         return res.status(401).json({ error: 'Yetkisiz erişim' });
     }
 
     try {
-        // 2. API'DEN VERİ ÇEKME: Bugünün tarihindeki maçları getir
+        console.log("1. API'ye İstek Atılıyor...");
         const today = new Date().toISOString().split('T')[0];
         const response = await fetch("https://v3.football.api-sports.io/fixtures?date=" + today, {
             headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
         });
         const json = await response.json();
+        
+        // EĞER API LİMİTİ DOLDUYSA VEYA HATA VARSA BURADA GÖRECEĞİZ
+        console.log("2. API'den Gelen Cevap Özeti:", JSON.stringify(json).substring(0, 200) + "..."); 
+
         const allMatches = json.response;
 
         if (!allMatches || allMatches.length === 0) {
-            return res.status(200).json({ message: "Bugün için veri bulunamadı veya API limiti doldu." });
+            console.log("UYARI: API maç listesi boş döndü! İşlem durduruluyor.");
+            return res.status(200).json({ message: "Veri bulunamadı veya API limiti doldu.", detay: json });
         }
 
-        // ---------------- 1. AŞAMA: TEMİZLİK DÖNGÜSÜ ----------------
-        // Dünün maçlarını daily_matches ve selected_matches tablolarından siliyoruz
-        // match_id'si 0'dan büyük olan her şeyi silerek tabloyu sıfırlamış oluyoruz
-        await supabase.from('daily_matches').delete().gt('match_id', 0);
-        await supabase.from('selected_matches').delete().gt('match_id', 0);
+        console.log(`3. API'den ${allMatches.length} maç çekildi. Supabase temizliği başlıyor...`);
 
-        // ---------------- 2. AŞAMA: GÜNLÜK MAÇLARI EKLEME ----------------
-        // Sadece bugünün maçlarını daily_matches tablosuna ekliyoruz
+        // .throwOnError() EKLEDİK: Eğer Supabase'de hata olursa sessiz kalmayıp sistemi durduracak
+        await supabase.from('daily_matches').delete().gt('match_id', 0).throwOnError();
+        await supabase.from('selected_matches').delete().gt('match_id', 0).throwOnError();
+        
+        console.log("4. Temizlik bitti. Yeni veriler yükleniyor...");
+
         const dailyData = allMatches.map(m => ({
             match_id: m.fixture.id,
             league_id: m.league.id,
@@ -47,19 +50,18 @@ export default async function handler(req, res) {
             match_date: m.fixture.date
         }));
 
-        await supabase.from('daily_matches').upsert(dailyData);
+        await supabase.from('daily_matches').upsert(dailyData).throwOnError();
 
-        // ---------------- 3. AŞAMA: ANA FİKSTÜR (MATCHES) GÜNCELLEMESİ ----------------
-        // Sadece bitmiş olan statüleri belirliyoruz
+        console.log("5. Daily matches güncellendi. Ana Fikstür kontrolü başlıyor...");
+
         const finishedStatuses = ['FT', 'AET', 'PEN'];
-        
-        // Sadece Lig ID'si 203 (Süper Lig) olan ve bitmiş maçları filtreliyoruz
         const finishedSuperLigMatches = allMatches.filter(m => 
             finishedStatuses.includes(m.fixture.status.short) && 
             m.league.id === 203
         );
 
-        // Katı kurallarına göre ana matches tablosunu güvenli bir şekilde güncelliyoruz
+        console.log(`6. Güncellenecek Süper Lig maçı sayısı: ${finishedSuperLigMatches.length}`);
+
         for (const m of finishedSuperLigMatches) {
             await supabase
                 .from('matches')
@@ -68,16 +70,16 @@ export default async function handler(req, res) {
                     away_score: m.goals.away ?? 0,
                     status: m.fixture.status.short 
                 })
-                .eq('id', m.fixture.id)                     // 1. Kural: ID'ler birebir aynı olmalı
-                .eq('league_id', 203)                       // 2. Kural: Lig kesinlikle 203 olmalı
-                .eq('season', '2025')                       // 3. Kural: Sezon 2025 olmalı
-                .eq('status', 'NS')                         // 4. Kural: Veritabanında şu an oynanmamış (NS) görünmeli
-                .eq('home_team_name', m.teams.home.name)    // 5. Kural: Ev sahibi adı API ile aynı olmalı
-                .eq('away_team_name', m.teams.away.name);   // 6. Kural: Deplasman adı API ile aynı olmalı
+                .eq('id', m.fixture.id)                     
+                .eq('league_id', 203)                       
+                .eq('season', '2025')                       
+                .eq('status', 'NS')                         
+                .eq('home_team_name', m.teams.home.name)    
+                .eq('away_team_name', m.teams.away.name)
+                .throwOnError();
         }
 
-        // ---------------- 4. AŞAMA: "GÜNÜN MAÇI" SEÇİMİ ----------------
-        // Belirlediğin öncelikli liglere göre ilk 3 maçı vitrin için ayırıyoruz
+        console.log("7. Vitrin (Selected Matches) güncelleniyor...");
         const priorityLeagues = [203, 39, 140, 135, 78, 61]; 
         let selected = allMatches
             .sort((a, b) => {
@@ -87,8 +89,6 @@ export default async function handler(req, res) {
             })
             .slice(0, 3);
 
-        // ---------------- 5. AŞAMA: SEÇİLEN MAÇLARIN DETAYLARINI KAYDETME ----------------
-        // Sadece bu 3 maç için API'ye tekrar istek atıp detaylı istatistiklerini alıyoruz
         for (const match of selected) {
             const detailRes = await fetch(`https://v3.football.api-sports.io/fixtures?id=${match.fixture.id}`, {
                 headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
@@ -102,14 +102,16 @@ export default async function handler(req, res) {
                     stats: m.statistics,
                     events: m.events,
                     updated_at: new Date()
-                });
+                }).throwOnError();
             }
         }
 
-        return res.status(200).json({ message: "Sistem başarıyla güncellendi: Temizlik yapıldı, skorlar işlendi, vitrin güncellendi!" });
+        console.log("8. İŞLEM BAŞARIYLA TAMAMLANDI!");
+        return res.status(200).json({ message: "Her şey güncellendi!" });
 
     } catch (err) {
-        console.error("Backend Hatası:", err.message);
+        // ARTIK BİR HATA OLURSA SESSİZ KALMAYACAK, BURAYA DÜŞECEK
+        console.error("KRİTİK HATA:", err.message);
         return res.status(500).json({ error: err.message });
     }
 }
