@@ -1,8 +1,16 @@
-name: Mac Guncelleme Cron
+name: Mert Skor - Mac Guncelleme Cron
+
 on:
   schedule:
-    - cron: '*/15 12-23 * * *' # Her gün 12:00-23:45 arası her 15 dakikada bir çalışır
-  workflow_dispatch: # Manuel çalıştırmak için buton ekler
+    # 1. KURAL: Yoğun Saatler (15 dk'da bir)
+    # UTC: 12:00 - 23:59 arası (Türkiye Saati: 15:00 - 02:59 arası)
+    - cron: '*/15 12-23 * * *'
+    
+    # 2. KURAL: Ölü Saatler (1 saatte bir)
+    # UTC: 00:00 - 11:59 arası (Türkiye Saati: 03:00 - 14:59 arası)
+    - cron: '0 0-11 * * *'
+    
+  workflow_dispatch: # Senin istediğin zaman GitHub üzerinden manuel tetikleyebilmen için (Çok faydalı!)
 
 jobs:
   cron:
