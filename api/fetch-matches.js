@@ -15,7 +15,10 @@ export default async function handler(req, res) {
     try {
         console.log("1. API'ye İstek Atılıyor...");
         const today = new Date().toISOString().split('T')[0];
-        const response = await fetch("https://v3.football.api-sports.io/fixtures?date=" + today, {
+        
+        // 👇 1. KRİTİK DÜZELTME: Timezone Eklendi!
+        // Artık Vercel'in Amerika saatiyle değil, Türkiye saatiyle tam o güne ait tüm maçları çekecek.
+        const response = await fetch(`https://v3.football.api-sports.io/fixtures?date=${today}&timezone=Europe/Istanbul`, {
             headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
         });
         const json = await response.json();
@@ -29,7 +32,6 @@ export default async function handler(req, res) {
         console.log(`2. API'den ${allMatches.length} maç çekildi. Supabase temizliği başlıyor...`);
 
         // ---------------- 1. AŞAMA: TEMİZLİK DÖNGÜSÜ ----------------
-        // Dünün maçlarını siliyoruz (.throwOnError() ile hata olursa çökmesini sağlıyoruz)
         await supabase.from('daily_matches').delete().gt('match_id', 0).throwOnError();
         await supabase.from('selected_matches').delete().gt('match_id', 0).throwOnError();
         
@@ -61,28 +63,21 @@ export default async function handler(req, res) {
             m.league.id === 203
         );
 
-      // 👇 YENİ EKLENEN KISIM: İSİM ÇEVİRİ SÖZLÜĞÜ 👇
-        // Sol taraf: API-Football'un gönderdiği isim (daily_matches'ten bakabilirsin)
-        // Sağ taraf: Senin matches tablonda yazan isim
+        // İSİM ÇEVİRİ SÖZLÜĞÜ
         const takimSozlugu = {
             "Rizespor": "Ç.Rizespor",
-            "Fenerbahce": "Fenerbahçe",       // Örnek: API'de ç yoktur, sende vardır
-            "Besiktas": "Beşiktaş",           // Örnek
-            "Gaziantep": "Gaziantep FK",      // Sen resimde Gaziantep FK yazmışsın, API Gaziantep diyebilir
+            "Fenerbahce": "Fenerbahçe",
+            "Besiktas": "Beşiktaş",
+            "Gaziantep": "Gaziantep FK",
             "Istanbul Basaksehir": "Başakşehir", 
-            "Alanyaspor": "Corendon Alanyaspor" // Eğer sende sponsorlu isim varsa
-            // Uyuşmayan diğer takımlarını buraya aynı mantıkla ekle...
+            "Alanyaspor": "Corendon Alanyaspor" 
         };
 
-        // Bu küçük fonksiyon, isim sözlükte varsa çevirir, yoksa (örn: Eyüpspor) aynen bırakır
         const cevir = (apiIsmi) => takimSozlugu[apiIsmi] || apiIsmi; 
-        // 👆 YENİ EKLENEN KISIM BİTTİ 👆
-
 
         console.log(`5. Güncellenebilecek potansiyel bitmiş Süper Lig maçı sayısı: ${finishedSuperLigMatches.length}`);
 
         for (const m of finishedSuperLigMatches) {
-            // İsimleri veritabanında aramadan önce sözlükten geçiriyoruz
             const dbHomeName = cevir(m.teams.home.name);
             const dbAwayName = cevir(m.teams.away.name);
 
@@ -96,35 +91,31 @@ export default async function handler(req, res) {
                 .eq('league_id', 203)
                 .eq('season', '2025')
                 .eq('status', 'NS')
-                .eq('home_team_name', dbHomeName)  // Artık çevrilmiş ismi arıyoruz!
-                .eq('away_team_name', dbAwayName)  // Artık çevrilmiş ismi arıyoruz!
+                .eq('home_team_name', dbHomeName)  
+                .eq('away_team_name', dbAwayName)  
                 .throwOnError();
         }
 
         console.log("6. Vitrin (selected_matches) seçimleri yapılıyor...");
 
-        // ---------------- 4. AŞAMA: "GÜNÜN MAÇI" SEÇİMİ ----------------
-      console.log("6. Vitrin (selected_matches) seçimleri yapılıyor...");
-
         // ---------------- 4. AŞAMA: AKILLI "GÜNÜN MAÇI" SEÇİMİ ----------------
-        // Maçlara önem derecesine göre puan veren fonksiyon
+        // 👇 2. KRİTİK DÜZELTME: Esnek İsim Arama (Küçük harf ve kelime içeriyorsa yakala mantığı)
         const getMatchPriority = (match) => {
-            const home = match.teams.home.name;
-            const away = match.teams.away.name;
+            const home = match.teams.home.name.toLowerCase();
+            const away = match.teams.away.name.toLowerCase();
 
             // 1. KURAL: 3 Büyükler (Öncelik sırasına göre)
-            // Not: İsimleri API'nin gönderdiği şekliyle yazıyoruz (İngilizce karakter)
-            if (home === 'Fenerbahce' || away === 'Fenerbahce') return 1;
-            if (home === 'Galatasaray' || away === 'Galatasaray') return 2;
-            if (home === 'Besiktas' || away === 'Besiktas') return 3;
+            if (home.includes('fenerbah') || away.includes('fenerbah')) return 1;
+            if (home.includes('galatasaray') || away.includes('galatasaray')) return 2;
+            if (home.includes('besiktas') || home.includes('beşiktaş') || away.includes('besiktas') || away.includes('beşiktaş')) return 3;
 
-            // 2. KURAL: Diğer Süper Lig Maçları (Hepsi 10 puan alır, kendi aralarında sıralanır)
+            // 2. KURAL: Diğer Süper Lig Maçları
             if (match.league.id === 203) return 10;
 
-            // 3. KURAL: 5 Büyük Lig (Premier League, La Liga, Serie A, Bundesliga, Ligue 1)
+            // 3. KURAL: 5 Büyük Lig 
             const top5 = [39, 140, 135, 78, 61];
             if (top5.includes(match.league.id)) {
-                return 20 + top5.indexOf(match.league.id); // 20, 21, 22... diye puanlar
+                return 20 + top5.indexOf(match.league.id);
             }
 
             // 4. KURAL: Geri kalan tüm sıradan maçlar
@@ -135,8 +126,6 @@ export default async function handler(req, res) {
         let selected = allMatches
             .sort((a, b) => getMatchPriority(a) - getMatchPriority(b))
             .slice(0, 3);
-
-        // ---------------- 5. AŞAMA: SEÇİLEN MAÇLARIN DETAYLARINI KAYDETME (AYNI KALIYOR) ----------------
 
         // ---------------- 5. AŞAMA: SEÇİLEN MAÇLARIN DETAYLARINI KAYDETME ----------------
         for (const match of selected) {
