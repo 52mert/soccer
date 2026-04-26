@@ -158,7 +158,9 @@ export default async function handler(req, res) {
             .slice(0, 3);
 
         // ---------------- 5. AŞAMA: SEÇİLEN MAÇLARIN DETAYLARINI KAYDETME ----------------
+      // ---------------- 5. AŞAMA: SEÇİLEN MAÇLARIN DETAYLARINI KAYDETME VE ARŞİVLEME ----------------
         for (const match of selected) {
+            // API'den detayları çekiyoruz
             const detailRes = await fetch(`https://v3.football.api-sports.io/fixtures?id=${match.fixture.id}`, {
                 headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
             });
@@ -166,12 +168,28 @@ export default async function handler(req, res) {
             const m = detailJson.response[0];
 
             if (m) {
+                // 1. İŞLEM: Günün Vitrini (selected_matches) için kaydet (Eski kodun)
                 await supabase.from('selected_matches').upsert({
                     match_id: m.fixture.id,
-                    stats: m.statistics,
                     events: m.events,
                     updated_at: new Date()
                 }).throwOnError();
+
+                // 2. İŞLEM: ANA VERİTABANINA (matches) KALICI ARŞİVLEME (Senin Harika Fikrin)
+                // Takım isimlerini yine sözlükten geçiriyoruz ki eşleşme sorunu yaşamayalım
+                const dbHomeName = cevir(m.teams.home.name);
+                const dbAwayName = cevir(m.teams.away.name);
+
+                await supabase
+                    .from('matches')
+                    .update({
+                        events: m.events         // Goller, Kartlar, Değişiklikler
+                          // Şutlar, Topla Oynama (Bonus olarak ekledim!)
+                    })
+                    .eq('season', '2025')
+                    .eq('home_team_name', dbHomeName)  
+                    .eq('away_team_name', dbAwayName)  
+                    .throwOnError();
             }
         }
 
