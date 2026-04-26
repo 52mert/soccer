@@ -13,32 +13,50 @@ export default async function handler(req, res) {
     }
 
     try {
-        console.log("1. API'ye İstek Atılıyor...");
-        const today = new Date().toISOString().split('T')[0];
-        
-        // 👇 1. KRİTİK DÜZELTME: Timezone Eklendi!
-        // Artık Vercel'in Amerika saatiyle değil, Türkiye saatiyle tam o güne ait tüm maçları çekecek.
-        const response = await fetch(`https://v3.football.api-sports.io/fixtures?date=${today}&timezone=Europe/Istanbul`, {
+        // 1. KRİTİK ADIM: Türkiye'nin takvim tarihini (YYYY-MM-DD) alıyoruz
+        const trToday = new Intl.DateTimeFormat('en-CA', { 
+            timeZone: 'Europe/Istanbul', 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit' 
+        }).format(new Date());
+
+        console.log(`1. Türkiye Tarihi: ${trToday} için API'ye istek atılıyor...`);
+
+        const response = await fetch(`https://v3.football.api-sports.io/fixtures?date=${trToday}&timezone=Europe/Istanbul`, {
             headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
         });
         const json = await response.json();
-        const allMatches = json.response;
+        
+        // rawMatches o güne ait tüm maçlardır (00:00'dan 23:59'a kadar)
+        const rawMatches = json.response;
 
-        if (!allMatches || allMatches.length === 0) {
+        if (!rawMatches || rawMatches.length === 0) {
             console.log("UYARI: API maç listesi boş döndü! İşlem durduruluyor.");
             return res.status(200).json({ message: "Veri bulunamadı veya API limiti doldu.", detay: json });
         }
 
-        console.log(`2. API'den ${allMatches.length} maç çekildi. Supabase temizliği başlıyor...`);
+        // 2. KRİTİK ADIM: Sadece Öğlen 12 ile Gece Yarısı (24:00) arasındaki maçları vitrin ve liste için ayırıyoruz
+        const filteredMatches = rawMatches.filter(m => {
+            const matchDate = new Date(m.fixture.date);
+            const trHour = parseInt(matchDate.toLocaleString('tr-TR', { 
+                timeZone: 'Europe/Istanbul', 
+                hour: '2-digit', 
+                hour12: false 
+            }));
+            return trHour >= 12 && trHour < 24;
+        });
+
+        console.log(`2. Toplam ${rawMatches.length} maçtan ${filteredMatches.length} tanesi (12:00-00:00) saat kriterine uydu.`);
 
         // ---------------- 1. AŞAMA: TEMİZLİK DÖNGÜSÜ ----------------
         await supabase.from('daily_matches').delete().gt('match_id', 0).throwOnError();
         await supabase.from('selected_matches').delete().gt('match_id', 0).throwOnError();
         
-        console.log("3. Temizlik bitti. Bugünün verileri daily_matches tablosuna ekleniyor...");
+        console.log("3. Temizlik bitti. Filtrelenen veriler daily_matches tablosuna ekleniyor...");
 
-        // ---------------- 2. AŞAMA: GÜNLÜK MAÇLARI EKLEME ----------------
-        const dailyData = allMatches.map(m => ({
+        // ---------------- 2. AŞAMA: GÜNLÜK MAÇLARI EKLEME (Sadece 12:00-24:00 arası maçlar) ----------------
+        const dailyData = filteredMatches.map(m => ({
             match_id: m.fixture.id,
             league_id: m.league.id,
             home_name: m.teams.home.name,
@@ -52,13 +70,17 @@ export default async function handler(req, res) {
             match_date: m.fixture.date
         }));
 
-        await supabase.from('daily_matches').upsert(dailyData).throwOnError();
+        if (dailyData.length > 0) {
+            await supabase.from('daily_matches').upsert(dailyData).throwOnError();
+        }
 
         console.log("4. Daily matches güncellendi. Ana Fikstür (matches) kontrolü başlıyor...");
 
         // ---------------- 3. AŞAMA: ANA FİKSTÜR (MATCHES) GÜNCELLEMESİ ----------------
         const finishedStatuses = ['FT', 'AET', 'PEN'];
-        const finishedSuperLigMatches = allMatches.filter(m => 
+        
+        // Güncellemeyi rawMatches (O günün tüm maçları) üzerinden yapıyoruz ki sabahtan kalan maçları kaçırmayalım
+        const finishedSuperLigMatches = rawMatches.filter(m => 
             finishedStatuses.includes(m.fixture.status.short) && 
             m.league.id === 203
         );
@@ -99,12 +121,11 @@ export default async function handler(req, res) {
         console.log("6. Vitrin (selected_matches) seçimleri yapılıyor...");
 
         // ---------------- 4. AŞAMA: AKILLI "GÜNÜN MAÇI" SEÇİMİ ----------------
-        // 👇 2. KRİTİK DÜZELTME: Esnek İsim Arama (Küçük harf ve kelime içeriyorsa yakala mantığı)
         const getMatchPriority = (match) => {
             const home = match.teams.home.name.toLowerCase();
             const away = match.teams.away.name.toLowerCase();
 
-            // 1. KURAL: 3 Büyükler (Öncelik sırasına göre)
+            // 1. KURAL: 3 Büyükler
             if (home.includes('fenerbah') || away.includes('fenerbah')) return 1;
             if (home.includes('galatasaray') || away.includes('galatasaray')) return 2;
             if (home.includes('besiktas') || home.includes('beşiktaş') || away.includes('besiktas') || away.includes('beşiktaş')) return 3;
@@ -122,8 +143,8 @@ export default async function handler(req, res) {
             return 100;
         };
 
-        // Tüm maçları puanlarına göre küçükten büyüğe sırala ve ilk 3'ü al
-        let selected = allMatches
+        // Vitrini sadece bizim saatlere uyan maçlardan (filteredMatches) seçiyoruz
+        let selected = filteredMatches
             .sort((a, b) => getMatchPriority(a) - getMatchPriority(b))
             .slice(0, 3);
 
@@ -145,7 +166,7 @@ export default async function handler(req, res) {
             }
         }
 
-        console.log("7. İŞLEM BAŞARIYLA TAMAMLANDI! Eski veriler silindi, yenileri eklendi, skorlar işlendi.");
+        console.log("7. İŞLEM BAŞARIYLA TAMAMLANDI! Filtreler uygulandı, skorlar işlendi.");
         return res.status(200).json({ message: "Sistem başarıyla güncellendi!" });
 
     } catch (err) {
