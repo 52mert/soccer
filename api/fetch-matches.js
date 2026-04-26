@@ -104,14 +104,39 @@ export default async function handler(req, res) {
         console.log("6. Vitrin (selected_matches) seçimleri yapılıyor...");
 
         // ---------------- 4. AŞAMA: "GÜNÜN MAÇI" SEÇİMİ ----------------
-        const priorityLeagues = [203, 39, 140, 135, 78, 61]; 
+      console.log("6. Vitrin (selected_matches) seçimleri yapılıyor...");
+
+        // ---------------- 4. AŞAMA: AKILLI "GÜNÜN MAÇI" SEÇİMİ ----------------
+        // Maçlara önem derecesine göre puan veren fonksiyon
+        const getMatchPriority = (match) => {
+            const home = match.teams.home.name;
+            const away = match.teams.away.name;
+
+            // 1. KURAL: 3 Büyükler (Öncelik sırasına göre)
+            // Not: İsimleri API'nin gönderdiği şekliyle yazıyoruz (İngilizce karakter)
+            if (home === 'Fenerbahce' || away === 'Fenerbahce') return 1;
+            if (home === 'Galatasaray' || away === 'Galatasaray') return 2;
+            if (home === 'Besiktas' || away === 'Besiktas') return 3;
+
+            // 2. KURAL: Diğer Süper Lig Maçları (Hepsi 10 puan alır, kendi aralarında sıralanır)
+            if (match.league.id === 203) return 10;
+
+            // 3. KURAL: 5 Büyük Lig (Premier League, La Liga, Serie A, Bundesliga, Ligue 1)
+            const top5 = [39, 140, 135, 78, 61];
+            if (top5.includes(match.league.id)) {
+                return 20 + top5.indexOf(match.league.id); // 20, 21, 22... diye puanlar
+            }
+
+            // 4. KURAL: Geri kalan tüm sıradan maçlar
+            return 100;
+        };
+
+        // Tüm maçları puanlarına göre küçükten büyüğe sırala ve ilk 3'ü al
         let selected = allMatches
-            .sort((a, b) => {
-                const aPriority = priorityLeagues.indexOf(a.league.id) === -1 ? 999 : priorityLeagues.indexOf(a.league.id);
-                const bPriority = priorityLeagues.indexOf(b.league.id) === -1 ? 999 : priorityLeagues.indexOf(b.league.id);
-                return aPriority - bPriority;
-            })
+            .sort((a, b) => getMatchPriority(a) - getMatchPriority(b))
             .slice(0, 3);
+
+        // ---------------- 5. AŞAMA: SEÇİLEN MAÇLARIN DETAYLARINI KAYDETME (AYNI KALIYOR) ----------------
 
         // ---------------- 5. AŞAMA: SEÇİLEN MAÇLARIN DETAYLARINI KAYDETME ----------------
         for (const match of selected) {
