@@ -952,3 +952,7 @@ nav a.active {
 @keyframes blinker {
   50% { opacity: 0.2; }
 }
+
+@keyframes blinker {
+  50% { opacity: 0.2; }
+}
