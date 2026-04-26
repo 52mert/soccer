@@ -77,15 +77,16 @@ export default async function handler(req, res) {
         console.log("4. Daily matches güncellendi. Ana Fikstür (matches) kontrolü başlıyor...");
 
         // ---------------- 3. AŞAMA: ANA FİKSTÜR (MATCHES) GÜNCELLEMESİ ----------------
-        const finishedStatuses = ['FT', 'AET', 'PEN'];
+    // ---------------- 3. AŞAMA: ANA FİKSTÜR (MATCHES) CANLI GÜNCELLEMESİ ----------------
+        // API'den gelen ve veritabanında güncellenmemesi GEREKEN statüler (NS = Başlamadı, PST = Ertelendi, CANC = İptal)
+        const ignoredStatuses = ['NS', 'PST', 'CANC', 'TBD'];
         
-        // Güncellemeyi rawMatches (O günün tüm maçları) üzerinden yapıyoruz ki sabahtan kalan maçları kaçırmayalım
-        const finishedSuperLigMatches = rawMatches.filter(m => 
-            finishedStatuses.includes(m.fixture.status.short) && 
-            m.league.id === 203
+        // rawMatches (o günün tüm maçları) içinden sadece 203 (Süper Lig) olan ve "başlamış/bitmiş" olanları seçiyoruz
+        const activeOrFinishedMatches = rawMatches.filter(m => 
+            m.league.id === 203 && !ignoredStatuses.includes(m.fixture.status.short)
         );
 
-        // İSİM ÇEVİRİ SÖZLÜĞÜ
+        // İSİM ÇEVİRİ SÖZLÜĞÜ (Aynen kalıyor)
         const takimSozlugu = {
             "Rizespor": "Ç.Rizespor",
             "Fenerbahce": "Fenerbahçe",
@@ -97,29 +98,35 @@ export default async function handler(req, res) {
 
         const cevir = (apiIsmi) => takimSozlugu[apiIsmi] || apiIsmi; 
 
-        console.log(`5. Güncellenebilecek potansiyel bitmiş Süper Lig maçı sayısı: ${finishedSuperLigMatches.length}`);
+        console.log(`5. Güncellenebilecek Canlı/Bitmiş Süper Lig maçı sayısı: ${activeOrFinishedMatches.length}`);
 
-        for (const m of finishedSuperLigMatches) {
+        for (const m of activeOrFinishedMatches) {
             const dbHomeName = cevir(m.teams.home.name);
             const dbAwayName = cevir(m.teams.away.name);
+
+            // KRİTİK: Eğer maç bitmişse (FT, AET, PEN), elapsed değerini sıfırla (null yap).
+            // Eğer maç hala oynanıyorsa API'den gelen dakikayı (m.fixture.status.elapsed) yaz.
+            const isFinished = ['FT', 'AET', 'PEN'].includes(m.fixture.status.short);
+            const currentElapsed = isFinished ? null : (m.fixture.status.elapsed ?? null);
 
             await supabase
                 .from('matches')
                 .update({
                     home_score: m.goals.home ?? 0,
                     away_score: m.goals.away ?? 0,
-                    status: m.fixture.status.short 
+                    status: m.fixture.status.short, // Artık 1H, HT, 2H veya FT yazacak
+                    elapsed: currentElapsed         // Canlıysa dakika (örn: 75), bittiyse NULL
                 })
                 .eq('league_id', 203)
                 .eq('season', '2025')
-                .eq('status', 'NS')
+                // DİKKAT: .eq('status', 'NS') kısmını SİLDİK. 
+                // Çünkü maç "1H" iken "2H" olarak güncellenmesi veya skorun değişmesi gerekebilir!
                 .eq('home_team_name', dbHomeName)  
                 .eq('away_team_name', dbAwayName)  
                 .throwOnError();
         }
 
         console.log("6. Vitrin (selected_matches) seçimleri yapılıyor...");
-
         // ---------------- 4. AŞAMA: AKILLI "GÜNÜN MAÇI" SEÇİMİ ----------------
         const getMatchPriority = (match) => {
             const home = match.teams.home.name.toLowerCase();
