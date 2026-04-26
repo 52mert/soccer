@@ -38,6 +38,7 @@ async function selectLeague(leagueId) {
 // 3. Veri Çekme Motoru
 // 3. Veri Çekme Motoru (Algoritmik Versiyon)
 // 3. Veri Çekme Motoru (CANLI DESTEKLİ PROFESYONEL VERSİYON)
+// 3. Veri Çekme Motoru (CANLI DESTEKLİ PROFESYONEL VERSİYON)
 async function fetchStandings(leagueId, season) {
     const tbody = document.getElementById("standingBody");
     if(!tbody) return;
@@ -60,13 +61,17 @@ async function fetchStandings(leagueId, season) {
 
     if (!matchError && matches && matches.length > 0) {
         let hesaplananTablo = {};
-        let canliTakimlar = new Set(); // O an maçı oynanan takımları hafızada tutacağız
+        
+        // YENİ: Sadece isimleri değil, o anki skoru da tutacak olan SÖZLÜK
+        let canliSkorlar = {}; 
 
         matches.forEach(mac => {
-            // SİHİR 2: Eğer maç henüz bitmediyse (canlıysa), bu takımları kırmızı listeye (Set) al
-            if (mac.status !== 'FT') {
-                canliTakimlar.add(mac.home_team_name);
-                canliTakimlar.add(mac.away_team_name);
+            // SİHİR 2: Eğer maçın dakikası varsa (elapsed null değilse), takım canlı oynuyordur!
+            if (mac.elapsed !== null) {
+                // Skoru "Ev - Dep" formatında kaydediyoruz
+                let anlikSkor = `${mac.home_score} - ${mac.away_score}`;
+                canliSkorlar[mac.home_team_name] = anlikSkor;
+                canliSkorlar[mac.away_team_name] = anlikSkor;
             }
 
             if (!hesaplananTablo[mac.home_team_name]) {
@@ -120,18 +125,26 @@ async function fetchStandings(leagueId, season) {
         finalData.forEach((team, index) => {
             const teamLogo = team.logo || 'https://via.placeholder.com/24?text=?';
             
-            // Eğer takım "canlıTakimlar" listesindeyse, isminin başına kırmızı yanan lambayı koy!
-            const isLive = canliTakimlar.has(team.takim_adi);
-            const liveIndicator = isLive ? `<span class="live-dot" title="Şu an oynuyor"></span>` : ``;
+            // YENİ: Takımın o an oynadığı bir maç var mı diye sözlüğe bakıyoruz
+            const canliSkor = canliSkorlar[team.takim_adi];
+            
+            // YENİ: Eğer canlı maç varsa nokta yerine yanıp sönen şık bir skor rozeti koy!
+            const liveIndicator = canliSkor 
+                ? `<span style="color: #ff3b30; font-weight: 900; font-size: 0.85em; background: rgba(255, 59, 48, 0.15); padding: 3px 7px; border-radius: 5px; border: 1px solid rgba(255, 59, 48, 0.3); animation: blinker 1.5s linear infinite; margin-right: 8px; box-shadow: 0 0 8px rgba(255, 59, 48, 0.2);">${canliSkor}</span>` 
+                : ``;
+
+            // Satırın arkaplanını hafif kızartma kodu
+            const satirStili = canliSkor ? 'background-color: rgba(255, 59, 48, 0.08);' : '';
 
             tbody.innerHTML += `
-                <tr style="${isLive ? 'background-color: rgba(255, 59, 48, 0.1);' : ''}"> <td>${index + 1}</td>
+                <tr style="${satirStili}"> 
+                    <td>${index + 1}</td>
                     <td style="text-align:left; display: flex; align-items: center; gap: 10px; border-bottom: none;">
                         ${liveIndicator}
                         <img src="${teamLogo}" 
                              style="width: 24px; height: 24px; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));" 
                              onerror="this.src='https://via.placeholder.com/24?text=?'">
-                        <strong style="${isLive ? 'color: #fff;' : ''}">${team.takim_adi}</strong>
+                        <strong style="${canliSkor ? 'color: #fff;' : ''}">${team.takim_adi}</strong>
                     </td>
                     <td>${team.om}</td>
                     <td>${team.g}</td>
