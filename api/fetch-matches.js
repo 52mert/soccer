@@ -87,17 +87,18 @@ export default async function handler(req, res) {
         );
 
         // İSİM ÇEVİRİ SÖZLÜĞÜ (Aynen kalıyor)
-        const takimSozlugu = {
+      const takimSozlugu = {
             "Rizespor": "Ç.Rizespor",
             "Fenerbahce": "Fenerbahçe",
             "Besiktas": "Beşiktaş",
             "Gaziantep": "Gaziantep FK",
             "Istanbul Basaksehir": "Başakşehir", 
-            "Alanyaspor": "Corendon Alanyaspor" ,
-            "Gençlerbirliği S.K.":"Gençlerbirliği"
+            "Alanyaspor": "Corendon Alanyaspor",
+            "Gençlerbirliği S.K.": "Gençlerbirliği"
         };
 
-        const cevir = (apiIsmi) => takimSozlugu[apiIsmi] || apiIsmi; 
+        // Gelişmiş Çevirmen: Bazen takımların sonunda boşluk olur, trim() ile onu temizliyoruz
+        const cevir = (apiIsmi) => takimSozlugu[apiIsmi.trim()] || apiIsmi.trim();
 
         console.log(`5. Güncellenebilecek Canlı/Bitmiş Süper Lig maçı sayısı: ${activeOrFinishedMatches.length}`);
 
