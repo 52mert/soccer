@@ -280,6 +280,7 @@ async function fetchFixtures(leagueId, season) {
 
 
 // 3. İlgili Haftanın Maçlarını Ekrana Bas (TARİH EKLENTİLİ)
+// 3. İlgili Haftanın Maçlarını Ekrana Bas (CANLI DAKİKA DESTEKLİ)
 function renderWeek(weekNum) {
     const fixtureList = document.getElementById("fixtureList");
     const weekDisplay = document.getElementById("currentWeekDisplay");
@@ -298,23 +299,42 @@ function renderWeek(weekNum) {
     fixtureList.innerHTML = ""; 
 
     weeklyMatches.forEach(mac => {
-        let scoreDisplay = mac.status === 'FT' ? `${mac.home_score} - ${mac.away_score}` : '-';
-        let colorDisplay = mac.status === 'FT' ? '#00ff00' : '#555';
-        
+        // --- CANLI SKOR VE DAKİKA MANTIĞI ---
+        const isLive = mac.elapsed !== null; // Dakika varsa maç canlıdır
+        const isFinished = ['FT', 'AET', 'PEN'].includes(mac.status); // Bitti mi?
+
+        let scoreDisplay = '-';
+        let saatBadge = '';
+        let colorDisplay = '#555';
+
         let macTarihi = mac.match_date_text || "Tarih Belirsiz";
         let macSaati = (mac.match_time && mac.match_time !== "Belirsiz") ? mac.match_time : ""; 
+
+        if (isFinished) {
+            // Maç bitmiş
+            scoreDisplay = `${mac.home_score} - ${mac.away_score}`;
+            colorDisplay = '#00ff00'; // Yeşil skor
+            saatBadge = `<span style="background: #2a2a2a; color: #aaa; padding: 4px 10px; border-radius: 6px; font-size: 0.85em; font-weight: bold;">MS</span>`;
+        } else if (isLive) {
+            // Maç şu an OYNANIYOR
+            scoreDisplay = `${mac.home_score} - ${mac.away_score}`;
+            colorDisplay = '#ff3b30'; // Kırmızı canlı skor
+            // Yanıp sönen CSS ekliyoruz (Blink)
+            saatBadge = `<span style="color: #ff3b30; padding: 4px 10px; font-weight: 900; font-size: 0.9em; animation: blinker 1.5s linear infinite;">${mac.elapsed}' <span style="font-size: 0.7em;">🔴</span></span>`;
+        } else {
+            // Maç henüz başlamamış
+            saatBadge = macSaati ? `<span style="background: #2a2a2a; color: #ddd; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 0.85em;">${macSaati}</span>` : '';
+        }
         
-        // Logo var mı kontrolü ve profesyonel stil ayarları
+        // Logo var mı kontrolü
         const hLogo = mac.home_team_logo || 'https://via.placeholder.com/30?text=?';
         const aLogo = mac.away_team_logo || 'https://via.placeholder.com/30?text=?';
 
-        let saatBadge = macSaati ? `<span style="background: #2a2a2a; color: #ddd; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 0.85em; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">${macSaati}</span>` : '';
-
         fixtureList.innerHTML += `
-            <div style="display: flex; flex-direction: column; background: #161616; padding: 16px; border-radius: 12px; border: 1px solid #222; transition: transform 0.2s, background 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.3); margin-bottom: 12px;">
+            <div style="display: flex; flex-direction: column; background: #161616; padding: 16px; border-radius: 12px; border: 1px solid #222; margin-bottom: 12px;">
                 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #222;">
-                    <span style="color: #777; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;">
+                    <span style="color: #777; font-size: 0.8em; font-weight: 700; text-transform: uppercase;">
                         ${macTarihi}
                     </span>
                     ${saatBadge}
@@ -323,19 +343,18 @@ function renderWeek(weekNum) {
                 <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
                     <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 12px;">
                         <span style="font-weight: 600; font-size: 1.1em; color: #eee; text-align: right;">${mac.home_team_name}</span>
-                        <img src="${hLogo}" alt="logo" style="width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">
+                        <img src="${hLogo}" style="width: 32px; height: 32px; object-fit: contain;">
                     </div>
                     
-                    <div style="margin: 0 10px; padding: 8px 18px; background: #0c0c0c; border-radius: 8px; font-weight: 700; font-size: 1.3em; color: ${colorDisplay}; text-align: center; min-width: 80px; border: 1px solid #1a1a1a; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
+                    <div style="margin: 0 10px; padding: 8px 18px; background: #0c0c0c; border-radius: 8px; font-weight: 700; font-size: 1.3em; color: ${colorDisplay}; text-align: center; min-width: 80px; border: 1px solid #1a1a1a;">
                         ${scoreDisplay}
                     </div>
                     
                     <div style="flex: 1; display: flex; align-items: center; justify-content: flex-start; gap: 12px;">
-                        <img src="${aLogo}" alt="logo" style="width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">
+                        <img src="${aLogo}" style="width: 32px; height: 32px; object-fit: contain;">
                         <span style="font-weight: 600; font-size: 1.1em; color: #eee; text-align: left;">${mac.away_team_name}</span>
                     </div>
                 </div>
-                
             </div>
         `;
     });
