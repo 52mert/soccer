@@ -947,3 +947,8 @@ nav a.active {
     50% { opacity: 0.4; transform: scale(0.8); }
     100% { opacity: 1; transform: scale(1); }
 }
+
+
+@keyframes blinker {
+  50% { opacity: 0.2; }
+}
