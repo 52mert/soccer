@@ -1566,3 +1566,39 @@ body.dark #btnGeri:hover {
         flex-shrink: 1 !important; /* %100'ü (pas başarısı gibi) aşarsa orantılı küçülür */
     }
 }
+
+/* ============================================================
+   İSTATİSTİK BARLARI: KUSURSUZ JS ORANLARI VE SIFIR(0) DÜZELTMESİ
+   ============================================================ */
+@media (max-width: 600px) {
+    
+    /* Bar Konteyneri: Aradaki gap(boşluk) ve justify bozuyordu, düzelttik */
+    #statsList > div > div:last-child {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: flex-start !important; /* Soldan sağa doğru, boşluksuz doldurur */
+        width: 100% !important;
+        height: 8px !important;
+        background: #2c3e50 !important; /* Dark mode uyumlu zemin */
+        border-radius: 4px !important;
+        overflow: hidden !important;
+        gap: 0 !important; /* Barlar arasına giren o sızıntı boşluğu YOK ETTİK */
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* İçteki Renkli Barlar: SADECE JS'in verdiği inline 'width' değerine itaat etsin */
+    #statsList > div > div:last-child > div {
+        display: block !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        flex: none !important; /* Flex'in barları kafasına göre sıkıştırıp esnetmesini yasakladık */
+    }
+    
+    /* SENIOR DOKUNUŞU: Eğer değer "0" (Sıfır) ise, o rengi ekrandan tamamen SİL! */
+    #statsList > div > div:last-child > div[style*="width: 0%"],
+    #statsList > div > div:last-child > div[style*="width:0%"] {
+        display: none !important;
+    }
+}
