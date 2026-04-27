@@ -93,7 +93,7 @@ export default async function handler(req, res) {
             "Besiktas": "Beşiktaş",
             "Gaziantep": "Gaziantep FK",
             "Istanbul Basaksehir": "Başakşehir", 
-            "Alanyaspor": "Corendon Alanyaspor",
+            
             "Gençlerbirliği S.K.": "Gençlerbirliği"
         };
 
