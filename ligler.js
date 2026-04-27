@@ -344,8 +344,7 @@ function renderWeek(weekNum) {
         const aLogo = mac.away_team_logo || 'https://via.placeholder.com/30?text=?';
 
         fixtureList.innerHTML += `
-            <div style="display: flex; flex-direction: column; background: #161616; padding: 16px; border-radius: 12px; border: 1px solid #222; margin-bottom: 12px;">
-                
+         <div onclick="showMatchDetails(${mac.id})" style="display: flex; flex-direction: column; background: #161616; padding: 16px; border-radius: 12px; border: 1px solid #222; margin-bottom: 12px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='#00ff00'" onmouseout="this.style.borderColor='#222'">    
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #222;">
                     <span style="color: #777; font-size: 0.8em; font-weight: 700; text-transform: uppercase;">
                         ${macTarihi}
@@ -381,4 +380,153 @@ function changeWeek(direction) {
 }
 function backToLeagues() {
    window.location.reload();
+
+    // --- MAÇ DETAYLARI (İSTATİSTİK VE OLAYLAR) ---
+
+function showMatchDetails(matchId) {
+    // 1. Maçı hafızadaki listeden bul (Sıfır bekleme süresi!)
+    const match = allFixtures.find(m => m.id === matchId);
+    if (!match) return;
+
+    // 2. Görünümleri Değiştir
+    document.getElementById('fixturesView').style.display = 'none';
+    document.getElementById('standingsView').style.display = 'none';
+    document.querySelector('.tab-menu').style.display = 'none'; // Sekmeleri gizle
+    document.getElementById('matchDetailView').style.display = 'block';
+
+    const header = document.getElementById("selectedMatchHeader");
+    const statsList = document.getElementById("statsList");
+    const eventsList = document.getElementById("eventsList");
+
+    // --- BAŞLIK (SKOR VE TAKIMLAR) KISMI ---
+    let skorDisplay = match.status === 'NS' ? 'v' : `${match.home_score ?? 0} - ${match.away_score ?? 0}`;
+    let dakikaDisplay = match.elapsed ? `<span style="color:#27ae60;">${match.elapsed}'</span>` : 'MS';
+    if (match.status === 'NS') dakikaDisplay = match.match_time || 'Başlamadı';
+
+    header.innerHTML = `
+        <div style="text-align: center; font-weight: bold; margin-bottom: 15px; color: #aaa;">
+            ${dakikaDisplay}
+        </div>
+        <div style="display:flex; justify-content:space-around; align-items:center;">
+            <div style="text-align:center;">
+                <img src="${match.home_team_logo}" width="60" style="object-fit: contain;">
+                <p style="margin-top:10px; font-weight:bold; color: #fff;">${match.home_team_name}</p>
+            </div>
+            <div style="font-size: 36px; font-weight: bold; background: #0c0c0c; color: #fff; padding: 10px 30px; border-radius: 10px; border: 1px solid #333;">
+                ${skorDisplay}
+            </div>
+            <div style="text-align:center;">
+                <img src="${match.away_team_logo}" width="60" style="object-fit: contain;">
+                <p style="margin-top:10px; font-weight:bold; color: #fff;">${match.away_team_name}</p>
+            </div>
+        </div>`;
+
+    // --- VERİLERİ PARÇALAMA ---
+    // Eğer veritabanında events yoksa veya null ise boş obje olarak kabul et
+    const matchData = match.events || {}; 
+    const istaData = matchData.istatistikler || [];
+    const olayData = matchData.olaylar || [];
+
+    // --- İSTATİSTİKLER KISMI ---
+    statsList.innerHTML = "<h3 style='border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:15px; color: #fff;'>Maç İstatistikleri</h3>";
+    
+    const statTranslations = {
+        "Shots on Goal": "İsabetli Şut", "Shots off Goal": "İsabetsiz Şut", "Total Shots": "Toplam Şut",
+        "Blocked Shots": "Engellenen Şut", "Fouls": "Faul", "Corner Kicks": "Korner", "Offsides": "Ofsayt", 
+        "Ball Possession": "Topla Oynama (%)", "Yellow Cards": "Sarı Kart", "Red Cards": "Kırmızı Kart", 
+        "Goalkeeper Saves": "Kaleci Kurtarışı", "Total passes": "Toplam Pas", "Passes accurate": "İsabetli Pas", "Passes %": "Pas Başarısı (%)"
+    };
+
+    if (istaData.length === 2) {
+        const homeStats = istaData[0].statistics;
+        const awayStats = istaData[1].statistics;
+
+        homeStats.forEach(stat => {
+            const hValRaw = stat.value;
+            const aValRaw = awayStats.find(s => s.type === stat.type)?.value;
+
+            let hVal = hValRaw === null ? 0 : parseInt(String(hValRaw).replace('%', '')) || 0;
+            let aVal = aValRaw === null ? 0 : parseInt(String(aValRaw).replace('%', '')) || 0;
+
+            if (hVal === 0 && aVal === 0) return; // İkisi de 0 ise gösterme
+
+            const label = statTranslations[stat.type] || stat.type;
+            let total = hVal + aVal;
+            let hPerc = total === 0 ? 50 : (hVal / total) * 100;
+            let aPerc = total === 0 ? 50 : (aVal / total) * 100;
+
+            if (stat.type === "Ball Possession" || stat.type === "Passes %") { hPerc = hVal; aPerc = aVal; }
+
+            statsList.innerHTML += `
+                <div style="margin-bottom: 15px;">
+                    <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:bold; margin-bottom:5px; color: #eee;">
+                        <span>${hValRaw !== null ? hValRaw : 0}</span>
+                        <span style="color:#888; font-weight:normal;">${label}</span>
+                        <span>${aValRaw !== null ? aValRaw : 0}</span>
+                    </div>
+                    <div style="display:flex; height:6px; background:#333; border-radius:4px; overflow:hidden;">
+                        <div style="width:${hPerc}%; background:#00ff00;"></div>
+                        <div style="width:${aPerc}%; background:#ff3b30;"></div>
+                    </div>
+                </div>`;
+        });
+    } else {
+        statsList.innerHTML += "<div style='color:#777; text-align:center;'>Bu maç için istatistik bulunmuyor.</div>";
+    }
+
+    // --- OLAYLAR KISMI ---
+    eventsList.innerHTML = "<h3 style='border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:15px; color: #fff;'>Maç Olayları</h3>";
+    
+    if (olayData.length > 0) {
+        const tumOlaylar = [...olayData].sort((a, b) => a.time.elapsed - b.time.elapsed);
+
+        tumOlaylar.forEach(event => {
+            const isHome = event.team.name === match.home_team_name;
+            const flexDir = isHome ? "row" : "row-reverse";
+            const textAlign = isHome ? "left" : "right";
+
+            let icon = "📌"; 
+            let detail = ""; 
+            
+            if (event.type === "Goal") {
+                icon = "⚽";
+                if (event.assist.name) detail = `(Asist: ${event.assist.name})`;
+                if (event.detail === "Own Goal") detail = "(Kendi Kalesine)";
+                if (event.detail === "Penalty") detail = "(Penaltı)";
+            } else if (event.type === "subst") {
+                icon = "🔄";
+                if (event.assist.name) detail = `(Çıkan: ${event.assist.name})`;
+            } else if (event.type === "Card") {
+                icon = event.detail.includes("Red") ? "🟥" : "🟨"; 
+            }
+
+            const displayMinute = event.time.extra ? `${event.time.elapsed}+${event.time.extra}` : event.time.elapsed;
+
+            eventsList.innerHTML += `
+                <div style="display:flex; align-items:center; flex-direction:${flexDir}; margin-bottom: 12px; border-bottom: 1px solid #222; padding-bottom: 8px;">
+                    <div style="font-weight:bold; color:#00ff00; margin: 0 15px; font-size:14px; min-width:30px; text-align:center;">${displayMinute}'</div>
+                    <div style="margin: 0 10px; font-size: 18px;">${icon}</div>
+                    <div style="text-align:${textAlign}; flex-grow: 1;">
+                        <span style="font-weight:bold; color:#eee;">${event.player.name || 'Bilinmiyor'}</span>
+                        <div style="font-size:12px; color:#888;">${detail}</div>
+                    </div>
+                </div>`;
+        });
+    } else {
+        eventsList.innerHTML += "<div style='color:#777; text-align:center;'>Henüz maç olayı yok.</div>";
+    }
+}
+
+// 4. Fikstüre Geri Dönüş Fonksiyonu
+function closeMatchDetails() {
+    document.getElementById('matchDetailView').style.display = 'none';
+    document.querySelector('.tab-menu').style.display = 'flex'; // Sekmeleri geri getir
+    
+    // Hangi sekmedeydiysek oraya geri dön
+    if (currentTab === 'standings') {
+        document.getElementById('standingsView').style.display = 'block';
+    } else {
+        document.getElementById('fixturesView').style.display = 'block';
+    }
+}
 }
