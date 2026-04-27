@@ -956,3 +956,115 @@ nav a.active {
 @keyframes blinker {
   50% { opacity: 0.2; }
 }
+
+
+/* ============================================================
+   LİGLER SAYFASI - SENIOR MOBIL DÜZELTME OPERASYONU
+   ============================================================ */
+@media (max-width: 600px) {
+
+    /* 1. ÜST BİLGİ ALANI (Header Row) DÜZELTMESİ */
+    /* Geri butonu, Lig Adı ve Sezon birbirine girmesin diye alt alta alıyoruz */
+    .detail-header-row {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 15px !important;
+        text-align: center !important;
+        position: relative !important;
+    }
+
+    /* Geri butonunu köşeye değil, üste veya sola ortalı alalım */
+    .detail-header-row .back-btn {
+        align-self: flex-start !important;
+        margin-bottom: 0 !important;
+        font-size: 13px !important;
+    }
+
+    .detail-header-row h2 {
+        font-size: 22px !important;
+        margin: 0 !important;
+        text-align: center !important;
+    }
+
+    /* 2. PUAN TABLOSU: Taşmayı Önleme ve Sütun Gizleme */
+    .puan-tablosu {
+        width: 100% !important;
+        table-layout: auto !important;
+    }
+
+    /* Mobilde G (Galibiyet), B (Beraberlik), M (Mağlubiyet) sütunlarını gizliyoruz!
+       Kullanıcı mobilde sadece #, Takım, O (Oynanan) ve P (Puan) görecek. En temiz UX budur. */
+    .puan-tablosu th:nth-child(4), .puan-tablosu td:nth-child(4), /* G */
+    .puan-tablosu th:nth-child(5), .puan-tablosu td:nth-child(5), /* B */
+    .puan-tablosu th:nth-child(6), .puan-tablosu td:nth-child(6)  /* M */ {
+        display: none !important;
+    }
+
+    /* Takım Sütunu Ayarları (Uzun isimler tabloyu esnetmesin) */
+    .puan-tablosu td:nth-child(2) {
+        max-width: 130px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important; /* Sığmazsa ... koyar */
+        text-align: left !important;
+    }
+
+    .puan-tablosu th, .puan-tablosu td {
+        padding: 10px 5px !important;
+        font-size: 13px !important;
+    }
+
+    .puan-tablosu td img {
+        width: 22px !important;
+        height: 22px !important;
+        vertical-align: middle !important;
+        margin-right: 5px !important;
+    }
+
+    /* 3. FİKSTÜR VE MAÇ DETAY (Alt Alta Binen Skor Sorunu) */
+    /* Skor kutusunu (2 - 1) yatayda zorla tutuyoruz */
+    #matchDetailView #selectedMatchHeader {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-around !important;
+        align-items: center !important;
+        padding: 15px 5px !important;
+    }
+
+    /* Skorun olduğu orta kutu (İçinde 2, -, 1 olan container) */
+    #matchDetailView #selectedMatchHeader > div:nth-child(2),
+    #matchDetailView #selectedMatchHeader div[style*="font-size: 36px"] {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        font-size: 24px !important; /* Mobilde 36px çok büyüktü, 24px ideal */
+        white-space: nowrap !important;
+        padding: 10px 15px !important;
+        min-width: 80px !important;
+    }
+
+    /* Takım isimleri ve logoları */
+    #matchDetailView #selectedMatchHeader > div {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        max-width: 80px !important;
+    }
+
+    #matchDetailView #selectedMatchHeader img {
+        width: 40px !important;
+        height: auto !important;
+        margin-bottom: 5px !important;
+    }
+
+    #matchDetailView #selectedMatchHeader p {
+        font-size: 11px !important;
+        word-wrap: break-word !important;
+        white-space: normal !important;
+        margin: 0 !important;
+    }
+}
