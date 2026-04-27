@@ -83,19 +83,29 @@
             </table>
         </div>
 
-      <div id="fixturesView" class="table-card" style="display: none;">
+     <div id="fixturesView" class="table-card" style="display: none;">
             <div class="week-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #222; padding: 10px; border-radius: 8px;">
                 <button onclick="changeWeek(-1)" style="padding: 5px 15px; cursor: pointer; border:none; border-radius: 5px;">◀ Önceki</button>
                 <h3 id="currentWeekDisplay" style="margin: 0; color: #fff;">1. Hafta</h3>
                 <button onclick="changeWeek(1)" style="padding: 5px 15px; cursor: pointer; border:none; border-radius: 5px;">Sonraki ▶</button>
             </div>
             <div id="fixtureList" style="display: flex; flex-direction: column; gap: 10px;">
-                </div>
+            </div>
         </div>
 
-    </div>
-</div>
+        <div id="matchDetailView" class="table-card" style="display: none; padding: 20px;">
+            <button onclick="closeMatchDetails()" class="back-btn" style="margin-bottom: 20px; background: #333; color: white; border: 1px solid #555; padding: 8px 15px; border-radius: 5px; cursor: pointer;">
+                ⬅ Fikstüre Dön
+            </button>
+            
+            <div id="selectedMatchHeader" style="background: #161616; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #222;"></div>
+            <div id="statsList" style="background: #161616; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #222;"></div>
+            <div id="eventsList" style="background: #161616; padding: 20px; border-radius: 12px; border: 1px solid #222;"></div>
+        </div>
 
+    </div> </div> ```
+
+Bunu yapıştırdığında UI tarafı da JS tarafı da tıkır tıkır birbirine bağlanmış olacak. Kaydet ve hemen bir test et bakalım, takımın üstüne tıklayınca o efsane ekran açılıyor mu?
        
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
