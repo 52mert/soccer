@@ -1540,3 +1540,29 @@ body.dark #btnGeri:hover {
         margin: 0 10px !important;
     }
 }
+
+
+/* ============================================================
+   İSTATİSTİK BARLARI KESİN ORAN ÇÖZÜMÜ (CSS SIZINTISI ENGELİ)
+   ============================================================ */
+@media (max-width: 600px) {
+    
+    /* Bar konteynerini her türlü müdahaleden koru */
+    #statsList > div > div:last-child {
+        display: flex !important;
+        width: 100% !important;
+        gap: 0 !important; /* Önceki kodlardan sızan boşlukları kesinlikle sıfırla */
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* İçteki renkli barların (Mavi ve Kırmızı) CSS sızıntılarını temizle */
+    #statsList > div > div:last-child > div {
+        display: block !important; /* Flex sızıntısını ezer, normal kutuya çevirir */
+        min-width: 0 !important; /* "0" olan değerlerin ekranda görünmesini engeller */
+        margin: 0 !important;
+        padding: 0 !important;
+        flex-grow: 0 !important;
+        flex-shrink: 1 !important; /* %100'ü (pas başarısı gibi) aşarsa orantılı küçülür */
+    }
+}
