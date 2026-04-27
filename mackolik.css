@@ -1171,3 +1171,19 @@ body.dark #btnGeri:hover {
         text-overflow: ellipsis;
     }
 }
+
+/* Maç konteynerini header'dan ve ekran kenarlarından ayırır */
+#matches {
+    padding-top: 25px;    /* Üstteki arama/menü kısmından uzaklaştırır */
+    padding-bottom: 50px; /* Sayfanın en altında biraz boşluk bırakır */
+    display: flex;
+    flex-direction: column;
+    align-items: center;  /* Kartları yatayda ortalar */
+}
+
+/* Her bir maç kartının arasını açar */
+.mac-kutusu {
+    margin-bottom: 25px !important; /* Kartlar arasına dikey boşluk */
+    width: 95%; /* Mobilde kenarlara yapışmaması için */
+    max-width: 650px; /* PC'de çok yayılmaması için */
+}
