@@ -428,9 +428,22 @@ function showMatchDetails(matchId) {
         </div>`;
 
     // --- VERİLERİ PARÇALAMA ---
-    const matchData = match.events || {}; 
-    const istaData = matchData.istatistikler || [];
-    const olayData = matchData.olaylar || [];
+  // --- VERİLERİ PARÇALAMA (Akıllı Kontrol) ---
+    const matchData = match.events; 
+    let istaData = [];
+    let olayData = [];
+
+    if (matchData) {
+        // Eğer matchData bir liste (Array) ise, bu ESKİ YAPIDIR. Hepsini olayData'ya at.
+        if (Array.isArray(matchData)) {
+            olayData = matchData;
+        } 
+        // Eğer matchData bir Obje ise ve içinde olaylar/istatistikler varsa, bu YENİ YAPIDIR.
+        else {
+            istaData = matchData.istatistikler || [];
+            olayData = matchData.olaylar || [];
+        }
+    }
 
     // --- İSTATİSTİKLER KISMI ---
     statsList.innerHTML = "<h3 style='border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:15px; color: #fff;'>Maç İstatistikleri</h3>";
