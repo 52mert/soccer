@@ -193,6 +193,12 @@ async function localStatistics(matchId) {
             return;
         }
 
+        // --- PAKETLENMİŞ VERİYİ AÇMA (KRİTİK NOKTA) ---
+        // Backend'de "events" sütununa hem istatistikleri hem olayları koyduğumuz için buradan çekiyoruz
+        const paket = details.events || {}; 
+        const gelenIstatistikler = paket.istatistikler || [];
+        const gelenOlaylar = paket.olaylar || [];
+
         const homeScore = match.home_score ?? 0;
         const awayScore = match.away_score ?? 0;
         const statusShort = match.status_short;
@@ -241,9 +247,9 @@ async function localStatistics(matchId) {
             "Goalkeeper Saves": "Kaleci Kurtarışı", "Total passes": "Toplam Pas", "Passes accurate": "İsabetli Pas", "Passes %": "Pas Başarısı (%)"
         };
 
-        if (details.stats && details.stats.length === 2) {
-            const homeStats = details.stats[0].statistics;
-            const awayStats = details.stats[1].statistics;
+        if (gelenIstatistikler.length === 2) {
+            const homeStats = gelenIstatistikler[0].statistics;
+            const awayStats = gelenIstatistikler[1].statistics;
 
             homeStats.forEach(stat => {
                 const hValRaw = stat.value;
@@ -284,8 +290,8 @@ async function localStatistics(matchId) {
         // OLAYLAR
         eventsList.innerHTML = "<h3 style='border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:15px; margin-top:30px;'>Maç Olayları</h3>";
         
-        if (details.events && details.events.length > 0) {
-            const tumOlaylar = [...details.events].sort((a, b) => a.time.elapsed - b.time.elapsed);
+        if (gelenOlaylar.length > 0) {
+            const tumOlaylar = [...gelenOlaylar].sort((a, b) => a.time.elapsed - b.time.elapsed);
 
             tumOlaylar.forEach(event => {
                 const isHome = event.team.name === match.home_name;
@@ -297,11 +303,11 @@ async function localStatistics(matchId) {
                 
                 if (event.type === "Goal") {
                     icon = "⚽";
-                    if (event.assist.name) detail = `(Asist: ${event.assist.name})`;
+                    if (event.assist && event.assist.name) detail = `(Asist: ${event.assist.name})`;
                     if (event.detail === "Own Goal") detail = "(Kendi Kalesine)";
                 } else if (event.type === "subst") {
                     icon = "🔄";
-                    if (event.assist.name) detail = `(Çıkan: ${event.assist.name})`;
+                    if (event.assist && event.assist.name) detail = `(Çıkan: ${event.assist.name})`;
                 } else if (event.type === "Card") {
                     icon = event.detail.includes("Red") ? "🟥" : "🟨"; 
                 }
