@@ -324,27 +324,23 @@ function renderWeek(weekNum) {
         let macSaati = (mac.match_time && mac.match_time !== "Belirsiz") ? mac.match_time : ""; 
 
         if (isFinished) {
-            // Maç bitmiş
             scoreDisplay = `${mac.home_score} - ${mac.away_score}`;
-            colorDisplay = '#00ff00'; // Yeşil skor
+            colorDisplay = '#00ff00';
             saatBadge = `<span style="background: #2a2a2a; color: #aaa; padding: 4px 10px; border-radius: 6px; font-size: 0.85em; font-weight: bold;">MS</span>`;
         } else if (isLive) {
-            // Maç şu an OYNANIYOR
             scoreDisplay = `${mac.home_score} - ${mac.away_score}`;
-            colorDisplay = '#ff3b30'; // Kırmızı canlı skor
-            // Yanıp sönen CSS ekliyoruz (Blink)
+            colorDisplay = '#ff3b30';
             saatBadge = `<span style="color: #ff3b30; padding: 4px 10px; font-weight: 900; font-size: 0.9em; animation: blinker 1.5s linear infinite;">${mac.elapsed}' <span style="font-size: 0.7em;">🔴</span></span>`;
         } else {
-            // Maç henüz başlamamış
             saatBadge = macSaati ? `<span style="background: #2a2a2a; color: #ddd; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 0.85em;">${macSaati}</span>` : '';
         }
         
-        // Logo var mı kontrolü
         const hLogo = mac.home_team_logo || 'https://via.placeholder.com/30?text=?';
         const aLogo = mac.away_team_logo || 'https://via.placeholder.com/30?text=?';
 
+        // SİHİR BURADA: onclick içine '${mac.id}' diyerek tek tırnak ekledik!
         fixtureList.innerHTML += `
-         <div onclick="showMatchDetails(${mac.id})" style="display: flex; flex-direction: column; background: #161616; padding: 16px; border-radius: 12px; border: 1px solid #222; margin-bottom: 12px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='#00ff00'" onmouseout="this.style.borderColor='#222'">    
+         <div onclick="showMatchDetails('${mac.id}')" style="display: flex; flex-direction: column; background: #161616; padding: 16px; border-radius: 12px; border: 1px solid #222; margin-bottom: 12px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='#00ff00'" onmouseout="this.style.borderColor='#222'">    
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #222;">
                     <span style="color: #777; font-size: 0.8em; font-weight: 700; text-transform: uppercase;">
                         ${macTarihi}
@@ -382,15 +378,21 @@ function changeWeek(direction) {
 // LİGLERE GERİ DÖN BUTONU
 function backToLeagues() {
    window.location.reload();
-} // İŞTE SENDE BU SÜSLÜ PARANTEZ EKSİKTİ VEYA EN ALTTA KALMIŞTI!
+} 
 
 
 // --- MAÇ DETAYLARI (İSTATİSTİK VE OLAYLAR) ---
 
 function showMatchDetails(matchId) {
-    // 1. Maçı hafızadaki listeden bul (Sıfır bekleme süresi!)
-    const match = allFixtures.find(m => m.id === matchId);
-    if (!match) return;
+    console.log("Tıklanan Maç ID:", matchId); // Hata ayıklama için konsola yazdırıyoruz
+
+    // SİHİR 2: İki tarafı da String'e çevirerek tip uyuşmazlığını (Sayı vs Metin) engelliyoruz
+    const match = allFixtures.find(m => String(m.id) === String(matchId));
+    
+    if (!match) {
+        console.error("Maç bulunamadı! Hafızadaki veride bu ID yok.");
+        return;
+    }
 
     // 2. Görünümleri Değiştir
     document.getElementById('fixturesView').style.display = 'none';
