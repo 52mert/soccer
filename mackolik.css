@@ -1460,3 +1460,83 @@ body.dark #btnGeri:hover {
         margin: 0 10px !important;
     }
 }
+/* ============================================================
+   FİNAL: İSTATİSTİK BARLARI VE DEPLASMAN KARTLARI KESİN ÇÖZÜM
+   ============================================================ */
+@media (max-width: 600px) {
+
+    /* 1. İSTATİSTİKLER: Barı Ortala ve % Oranlarını Düzelt */
+    
+    /* Yazı ve Bar Konteynerini alt alta inmeye zorla */
+    #statsList > div {
+        display: block !important; 
+        width: 100% !important;
+        margin-bottom: 25px !important;
+    }
+
+    /* Yazı Satırı (0 - Sarı Kart - 1) */
+    #statsList > div > div:first-child {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        margin-bottom: 8px !important;
+    }
+
+    /* Grafik Barı Konteyneri (Tam Ortala ve Sığdır) */
+    #statsList > div > div:last-child {
+        display: flex !important;
+        flex-direction: row !important;
+        width: 100% !important;
+        height: 8px !important; /* Bar kalınlığı */
+        background: #2c3e50 !important; /* Arka plan rayı */
+        border-radius: 4px !important;
+        overflow: hidden !important;
+        gap: 0 !important; /* Eski kodun bozduğu aralığı sıfırla */
+        padding: 0 !important;
+        min-width: 0 !important;
+    }
+
+    /* İçteki Renkli Barlar (JS oranlarının %50-%50 vs. çalışması için) */
+    #statsList > div > div:last-child > div {
+        display: block !important;
+        height: 100% !important;
+        min-width: 0 !important; /* ÇOK KRİTİK: Barın esnemesini sağlar */
+        border-radius: 0 !important;
+    }
+
+    /* Ev Sahibi Bar Rengi (Mavi) */
+    #statsList > div > div:last-child > div:first-child {
+        background-color: #3498db !important; 
+    }
+    
+    /* Deplasman Bar Rengi (Kırmızı) */
+    #statsList > div > div:last-child > div:last-child {
+        background-color: #e74c3c !important; 
+    }
+
+
+    /* 2. MAÇ OLAYLARI (Deplasmanı Sağa Alma Hack'i) */
+    
+    /* Önce her şeyi normal (Ev sahibi gibi sola) hizala */
+    #eventsList > div {
+        display: flex !important;
+        flex-direction: row !important; 
+        align-items: center !important;
+        width: 100% !important;
+        padding: 10px 5px !important;
+        border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+        box-sizing: border-box !important;
+    }
+
+    /* EĞER JS kodu "row-reverse" (Deplasman) basmışsa CSS bunu okusun ve ters çevirsin! */
+    #eventsList > div[style*="row-reverse"] {
+        flex-direction: row-reverse !important; 
+    }
+
+    /* Olay içindeki detayları sıkışmaktan kurtar */
+    #eventsList > div > div {
+        display: block !important;
+        margin: 0 10px !important;
+    }
+}
