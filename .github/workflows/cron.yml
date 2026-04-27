@@ -2,10 +2,10 @@ name: Mert Skor - Mac Guncelleme Cron
 
 on:
   schedule:
-    # TEK KURAL: 7/24 her saat başı çalışır (Günde 24 kez çalışarak limitini korur)
-    - cron: '0 * * * *'
+    # 2 saatte bir çalışır (Örn: 10:00, 12:00, 14:00...)
+    - cron: '0 */2 * * *'
     
-  workflow_dispatch: # Senin istediğin zaman GitHub üzerinden manuel tetikleyebilmen için
+  workflow_dispatch: # Manuel çalıştırmak istersen buton hala orada
 
 jobs:
   cron:
