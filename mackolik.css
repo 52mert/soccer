@@ -979,3 +979,83 @@ body.dark #btnGeri {
 body.dark #btnGeri:hover {
     background-color: #1d4ed8 !important;
 }
+
+/* --- MOBİL RESPONSIVE AYARLARI (600px ve altı) --- */
+@media (max-width: 600px) {
+    
+    /* 1. Arama çubuğunu gizle */
+    .search-container {
+        display: none !important;
+    }
+
+    /* 2. Header'ı daha derli toplu yap */
+    .header {
+        padding: 10px;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .nav {
+        width: 100%;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .nav-item {
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+
+    /* 3. Maç Kartlarını (Anasayfa) Düzenle */
+    .mac-kutusu {
+        padding: 15px 10px;
+        margin-bottom: 10px;
+        width: 95%; /* Kenarlardan çok az boşluk kalsın */
+    }
+
+    /* Takım isimlerinin sığması için fontu küçült */
+    .mac-kutusu p, .header-team p {
+        font-size: 13px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis; /* Çok uzunsa üç nokta koyar */
+        max-width: 80px;
+    }
+
+    /* 4. Detay Sayfası (StatsPage) Skor Header'ı Düzenle */
+    /* Fotoğraftaki üst üste binmeyi bu kısım çözecek */
+    .header-score {
+        font-size: 24px !important; /* 36px çok büyüktü */
+        padding: 5px 15px !important;
+        min-width: 80px;
+        text-align: center;
+    }
+
+    .header-teams {
+        gap: 5px;
+    }
+
+    .header-team img {
+        width: 45px !important; /* Logoları biraz küçültelim */
+    }
+
+    /* 5. İstatistik Barlarını Düzenle */
+    #statsList div div span {
+        font-size: 12px !important; /* İstatistik isimleri ve rakamları */
+    }
+
+    /* 6. Maç Olayları (Events) Düzenle */
+    #eventsList div {
+        font-size: 13px !important;
+    }
+
+    #eventsList div div {
+        margin: 0 5px !important;
+    }
+
+    /* 7. Geri Dön Butonu */
+    .back-btn {
+        width: 90%;
+        font-size: 14px;
+    }
+}
