@@ -159,8 +159,18 @@ export default async function handler(req, res) {
 
         // ---------------- 5. AŞAMA: SEÇİLEN MAÇLARIN DETAYLARINI KAYDETME ----------------
       // ---------------- 5. AŞAMA: SEÇİLEN MAÇLARIN DETAYLARINI KAYDETME VE ARŞİVLEME ----------------
-       for (const match of selected) {
-            // API'den detayları çekiyoruz
+   for (const match of selected) {
+            // --- SENİOR DOKUNUŞU: DURUM KONTROLÜ ---
+            const status = match.fixture.status.short; // NS, TBD, FT, LIVE vb.
+            
+            // Eğer maç henüz başlamadıysa (NS veya TBD), API'den detay çekmeye GEREK YOK.
+            // Çünkü henüz ne bir gol var, ne de bir istatistik.
+            if (["NS", "TBD"].includes(status)) {
+                console.log(`⏩ ${match.teams.home.name} maçı henüz başlamadı (Status: ${status}). API isteği atlanıyor.`);
+                continue; // Döngünün bu adımını atla, sıradaki maça geç
+            }
+
+            // Eğer kod buraya ulaştıysa maç ya canlıdır ya da bitmiştir, detayları çekebiliriz.
             const detailRes = await fetch(`https://v3.football.api-sports.io/fixtures?id=${match.fixture.id}`, {
                 headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
             });
@@ -168,16 +178,15 @@ export default async function handler(req, res) {
             const m = detailJson.response[0];
 
             if (m) {
-                // SİHİR BURADA: İkisini tek bir JSON objesinde birleştiriyoruz!
                 const birlesikVeri = {
-                    olaylar: m.events,          // Goller, kartlar, değişiklikler
-                    istatistikler: m.statistics // Şutlar, topla oynama, paslar vs.
+                    olaylar: m.events,
+                    istatistikler: m.statistics
                 };
 
                 // 1. İŞLEM: Günün Vitrini (selected_matches) için kaydet
                 await supabase.from('selected_matches').upsert({
                     match_id: m.fixture.id,
-                    events: birlesikVeri, // Artık hem olaylar hem istatistikler tek pakette gidiyor
+                    events: birlesikVeri,
                     updated_at: new Date()
                 }).throwOnError();
 
@@ -188,7 +197,7 @@ export default async function handler(req, res) {
                 await supabase
                     .from('matches')
                     .update({
-                        events: birlesikVeri // Aynı birleşik paketi ana arşive de gönderiyoruz
+                        events: birlesikVeri
                     })
                     .eq('season', '2025')
                     .eq('home_team_name', dbHomeName)  
