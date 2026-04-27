@@ -159,7 +159,7 @@ export default async function handler(req, res) {
 
         // ---------------- 5. AŞAMA: SEÇİLEN MAÇLARIN DETAYLARINI KAYDETME ----------------
       // ---------------- 5. AŞAMA: SEÇİLEN MAÇLARIN DETAYLARINI KAYDETME VE ARŞİVLEME ----------------
-        for (const match of selected) {
+       for (const match of selected) {
             // API'den detayları çekiyoruz
             const detailRes = await fetch(`https://v3.football.api-sports.io/fixtures?id=${match.fixture.id}`, {
                 headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
@@ -168,23 +168,27 @@ export default async function handler(req, res) {
             const m = detailJson.response[0];
 
             if (m) {
-                // 1. İŞLEM: Günün Vitrini (selected_matches) için kaydet (Eski kodun)
+                // SİHİR BURADA: İkisini tek bir JSON objesinde birleştiriyoruz!
+                const birlesikVeri = {
+                    olaylar: m.events,          // Goller, kartlar, değişiklikler
+                    istatistikler: m.statistics // Şutlar, topla oynama, paslar vs.
+                };
+
+                // 1. İŞLEM: Günün Vitrini (selected_matches) için kaydet
                 await supabase.from('selected_matches').upsert({
                     match_id: m.fixture.id,
-                    events: m.events,
+                    events: birlesikVeri, // Artık hem olaylar hem istatistikler tek pakette gidiyor
                     updated_at: new Date()
                 }).throwOnError();
 
-                // 2. İŞLEM: ANA VERİTABANINA (matches) KALICI ARŞİVLEME (Senin Harika Fikrin)
-                // Takım isimlerini yine sözlükten geçiriyoruz ki eşleşme sorunu yaşamayalım
+                // 2. İŞLEM: ANA VERİTABANINA (matches) KALICI ARŞİVLEME
                 const dbHomeName = cevir(m.teams.home.name);
                 const dbAwayName = cevir(m.teams.away.name);
 
                 await supabase
                     .from('matches')
                     .update({
-                        events: m.events         // Goller, Kartlar, Değişiklikler
-                          // Şutlar, Topla Oynama (Bonus olarak ekledim!)
+                        events: birlesikVeri // Aynı birleşik paketi ana arşive de gönderiyoruz
                     })
                     .eq('season', '2025')
                     .eq('home_team_name', dbHomeName)  
