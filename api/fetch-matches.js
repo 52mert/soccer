@@ -157,21 +157,30 @@ export default async function handler(req, res) {
             .sort((a, b) => getMatchPriority(a) - getMatchPriority(b))
             .slice(0, 3);
 
-        // ---------------- 5. AŞAMA: SEÇİLEN MAÇLARIN DETAYLARINI KAYDETME ----------------
-      // ---------------- 5. AŞAMA: SEÇİLEN MAÇLARIN DETAYLARINI KAYDETME VE ARŞİVLEME ----------------
-   for (const match of selected) {
-            // --- SENİOR DOKUNUŞU: DURUM KONTROLÜ ---
-            const status = match.fixture.status.short; // NS, TBD, FT, LIVE vb.
+    for (const match of selected) {
+            const status = match.fixture.status.short; // NS, LIVE, FT vb.
+            const matchId = match.fixture.id;
             
-            // Eğer maç henüz başlamadıysa (NS veya TBD), API'den detay çekmeye GEREK YOK.
-            // Çünkü henüz ne bir gol var, ne de bir istatistik.
+            // Eğer maç henüz başlamadıysa (NS veya TBD)
             if (["NS", "TBD"].includes(status)) {
-                console.log(`⏩ ${match.teams.home.name} maçı henüz başlamadı (Status: ${status}). API isteği atlanıyor.`);
-                continue; // Döngünün bu adımını atla, sıradaki maça geç
+                console.log(`📌 ${match.teams.home.name} maçı vitrine ekleniyor (Başlamadığı için API pas geçildi).`);
+                
+                // API'DEN VERİ ÇEKMİYORUZ (Limit cebimizde kalıyor!)
+                // Sadece vitrin tablosuna (selected_matches) temel kaydı yapıyoruz
+                await supabase.from('selected_matches').upsert({
+                    match_id: matchId,
+                    events: { olaylar: [], istatistikler: [] }, // Boş paket gönderiyoruz
+                    updated_at: new Date()
+                }).throwOnError();
+
+                // Ana arşivi (matches) güncellemeye gerek yok çünkü zaten skor 0-0 ve olay yok.
+                continue; // Bu maçla işimiz bitti, sıradakine geç.
             }
 
-            // Eğer kod buraya ulaştıysa maç ya canlıdır ya da bitmiştir, detayları çekebiliriz.
-            const detailRes = await fetch(`https://v3.football.api-sports.io/fixtures?id=${match.fixture.id}`, {
+            // --- BURADAN AŞAĞISI SADECE BAŞLAMIŞ VEYA BİTMİŞ MAÇLAR İÇİN ÇALIŞIR ---
+            
+            // İşte şimdi API hakkımızı harcayabiliriz, çünkü içeride veri var!
+            const detailRes = await fetch(`https://v3.football.api-sports.io/fixtures?id=${matchId}`, {
                 headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
             });
             const detailJson = await detailRes.json();
@@ -183,22 +192,20 @@ export default async function handler(req, res) {
                     istatistikler: m.statistics
                 };
 
-                // 1. İŞLEM: Günün Vitrini (selected_matches) için kaydet
+                // 1. İŞLEM: Günün Vitrini (selected_matches) - DOLU VERİ
                 await supabase.from('selected_matches').upsert({
-                    match_id: m.fixture.id,
+                    match_id: matchId,
                     events: birlesikVeri,
                     updated_at: new Date()
                 }).throwOnError();
 
-                // 2. İŞLEM: ANA VERİTABANINA (matches) KALICI ARŞİVLEME
+                // 2. İŞLEM: ANA VERİTABANINA (matches) ARŞİVLEME
                 const dbHomeName = cevir(m.teams.home.name);
                 const dbAwayName = cevir(m.teams.away.name);
 
                 await supabase
                     .from('matches')
-                    .update({
-                        events: birlesikVeri
-                    })
+                    .update({ events: birlesikVeri })
                     .eq('season', '2025')
                     .eq('home_team_name', dbHomeName)  
                     .eq('away_team_name', dbAwayName)  
