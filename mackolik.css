@@ -1059,3 +1059,67 @@ body.dark #btnGeri:hover {
         font-size: 14px;
     }
 }
+
+
+/* ============================================================
+   MİNİ MAÇKOLİK - MOBİL RESPONSIVE FİNAL DOKUNUŞU
+   ============================================================ */
+@media (max-width: 600px) {
+
+    /* 1. Skorun Yan Yana (Yatay) Durmasını Sağla */
+    .header-score {
+        display: flex !important;
+        flex-direction: row !important; /* Kesinlikle yatay (0 - 0) */
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 10px !important; /* Rakamlar arası nefes payı */
+        font-size: 22px !important;
+        padding: 10px 20px !important;
+        white-space: nowrap !important; /* Asla alt satıra geçme */
+        min-width: 110px !important; /* Kutunun formu bozulmasın */
+        background: #fdfdfd !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+    }
+
+    /* 2. Maç Kartları Arasına Boşluk Ekle */
+    .mac-kutusu {
+        margin-bottom: 35px !important; /* Kartları birbirinden uzaklaştırır */
+        padding: 15px 10px !important;
+        width: 92% !important; /* Kenarlardan şık bir boşluk bırakır */
+        border: 1px solid rgba(0,0,0,0.03) !important; /* Hafif bir çerçeve */
+    }
+
+    /* 3. Arama Çubuğunu Mobilde Gizle */
+    .search-container {
+        display: none !important;
+    }
+
+    /* 4. Takım ve Logo Yerleşimi (Sıkışıklığı Giderir) */
+    .header-teams {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+        gap: 5px !important;
+    }
+
+    .header-team img {
+        width: 42px !important; /* Logolara yer açmak için ideal boyut */
+        height: 42px !important;
+        object-fit: contain;
+    }
+
+    .header-team p {
+        font-size: 12px !important;
+        margin-top: 5px !important;
+        max-width: 75px !important;
+        line-height: 1.2;
+    }
+
+    /* 5. Geri Dön Butonunu Mobilde Büyüt (Tıklama Kolaylığı) */
+    .back-btn {
+        width: 100% !important;
+        padding: 12px !important;
+        font-weight: bold !important;
+    }
+}
