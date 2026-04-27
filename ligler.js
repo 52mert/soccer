@@ -378,10 +378,14 @@ function changeWeek(direction) {
     currentWeek += direction;
     renderWeek(currentWeek);
 }
+
+// LİGLERE GERİ DÖN BUTONU
 function backToLeagues() {
    window.location.reload();
+} // İŞTE SENDE BU SÜSLÜ PARANTEZ EKSİKTİ VEYA EN ALTTA KALMIŞTI!
 
-    // --- MAÇ DETAYLARI (İSTATİSTİK VE OLAYLAR) ---
+
+// --- MAÇ DETAYLARI (İSTATİSTİK VE OLAYLAR) ---
 
 function showMatchDetails(matchId) {
     // 1. Maçı hafızadaki listeden bul (Sıfır bekleme süresi!)
@@ -422,7 +426,6 @@ function showMatchDetails(matchId) {
         </div>`;
 
     // --- VERİLERİ PARÇALAMA ---
-    // Eğer veritabanında events yoksa veya null ise boş obje olarak kabul et
     const matchData = match.events || {}; 
     const istaData = matchData.istatistikler || [];
     const olayData = matchData.olaylar || [];
@@ -528,5 +531,4 @@ function closeMatchDetails() {
     } else {
         document.getElementById('fixturesView').style.display = 'block';
     }
-}
 }
