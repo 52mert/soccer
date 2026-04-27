@@ -1123,3 +1123,51 @@ body.dark #btnGeri:hover {
         font-weight: bold !important;
     }
 }
+
+/* --- ANA SAYFA MOBİL DÜZENLEME (SKOR VE BOŞLUK) --- */
+@media (max-width: 600px) {
+
+    /* 1. Kartlar arasındaki dikey boşluğu açar */
+    .mac-kutusu {
+        margin-bottom: 30px !important; /* Kartları birbirinden uzaklaştırır */
+        padding: 15px 10px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 15px !important; /* Kart içindeki elemanları (takımlar-skor-dakika) ayırır */
+    }
+
+    /* 2. Skorun yan yana (0 - 0) durmasını zorunlu kılar */
+    /* Bu kısım hem ana sayfa hem detaydaki o stacklenmeyi çözer */
+    .header-score, 
+    [class*="score"], 
+    .mac-kutusu div div { 
+        display: flex !important;
+        flex-direction: row !important; /* Kesinlikle yatay */
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important; /* Rakamlar arası boşluk */
+        white-space: nowrap !important; /* Aşağı kaymayı engelle */
+    }
+
+    /* 3. Takımların ve skorun aynı satırda düzgün durması için */
+    .mac-kutusu > div {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-around !important;
+        align-items: center !important;
+        width: 100% !important;
+    }
+
+    /* 4. Logoların ve isimlerin birbirini ezmemesi için */
+    .mac-kutusu img {
+        width: 35px !important;
+        height: 35px !important;
+    }
+
+    .mac-kutusu p {
+        font-size: 12px !important;
+        max-width: 80px !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
