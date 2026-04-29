@@ -1,7 +1,7 @@
 // 1. Supabase Bağlantısı
 const SUPABASE_URL = process.env.SUPABASE_URL;
 // Publishable Key'i buraya yapıştır kanka
-const SUPABASE_KEY = "sb_publishable_XeQN6Ha9dWfJ_SqjLUsx9A_DM-8ld4k"; 
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; 
 
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
