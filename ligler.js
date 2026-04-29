@@ -197,41 +197,60 @@ function changeSeason() {
 const themeToggle = document.getElementById('theme-toggle');
 const themeIcon = document.getElementById('theme-icon');
 
-const themeToggle = document.getElementById('theme-toggle');
-const themeIcon = document.getElementById('theme-icon');
+// 1. BAŞLANGIÇ AYARI: Her zaman karanlık başlasın
 
-// 1. BAŞLANGIÇ AYARI: LocalStorage'ı kontrol et
-// Tarayıcı hafızasında kayıtlı bir tema varsa onu al, yoksa 'dark' (karanlık) başla.
-const savedTheme = localStorage.getItem('theme') || 'dark';
-document.documentElement.setAttribute('data-theme', savedTheme);
+// LocalStorage'ı kontrol etmiyoruz (her zaman karanlık başlaması için), 
 
-// İkonu hafızadan gelen temaya göre ayarla
-themeIcon.innerText = savedTheme === 'light' ? '🌙' : '☀️';
+// sadece mevcut durumu set ediyoruz.
 
-// 2. BUTONA TIKLANINCA
+document.documentElement.setAttribute('data-theme', 'dark');
+
+themeIcon.innerText = '☀️'; // Karanlıkta güneş (aydınlığa geçmek için)
+
+
+
 themeToggle.addEventListener('click', () => {
-    // Mevcut temayı al ve yenisini belirle
+
+    // Mevcut temayı al
+
     const currentTheme = document.documentElement.getAttribute('data-theme');
+
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
     
-    // YENİ: Seçilen temayı tarayıcının hafızasına (localStorage) kalıcı olarak kaydet!
-    localStorage.setItem('theme', newTheme);
-    
+
     // Profesyonel Dönme Animasyonu Sınıfı Ekle
+
     themeToggle.classList.add('rotating');
+
     
+
     // Temayı Değiştir
+
     document.documentElement.setAttribute('data-theme', newTheme);
+
     
-    // İkonu Değiştir (Dönüşün tam ortasında ikon değişsin)
+
+    // İkonu Değiştir (Emoji kullanımı daha akıcıdır)
+
+    // Aydınlık modda 'Ay' (Geceye geçmek için), Karanlık modda 'Güneş'
+
     setTimeout(() => {
+
         themeIcon.innerText = (newTheme === 'light') ? '🌙' : '☀️';
-    }, 150); 
+
+    }, 150); // Dönüşün tam ortasında ikon değişsin
+
+
 
     // Animasyon bitince sınıfı kaldır
+
     setTimeout(() => {
+
         themeToggle.classList.remove('rotating');
+
     }, 600);
+
 });
 
 
@@ -295,7 +314,7 @@ async function fetchFixtures(leagueId, season) {
     // Verileri hafızaya al ve 1. Haftayı göster
     allFixtures = data;
     matchesPerWeek = (allFixtures.length === 306) ? 9 : 10; // 18 takımsa 9 maç, 20 takımsa 10 maç
-    currentWeek = 30; 
+    currentWeek = 1; 
     renderWeek(currentWeek);
 }
 
