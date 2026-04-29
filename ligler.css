@@ -257,3 +257,40 @@ nav a.active { color: var(--accent) !important; border-bottom: 2px solid var(--a
         margin: 40px auto !important; /* Üstten biraz boşluk bırakıp ortalar */
     }
 }
+
+
+/* ============================================================
+   MOBİL FİKSTÜR KARTI: TAKIM İSİMLERİNİN TAŞMASINI ÖNLEME
+   ============================================================ */
+@media (max-width: 600px) {
+    /* Fikstür kartının içindeki takımların ve skorun olduğu alt satır */
+    #fixtureList > div > div:last-child {
+        flex-wrap: nowrap !important;
+        gap: 5px !important; /* Mobilde aradaki boşluğu kıstık */
+    }
+
+    /* Ev sahibi ve Deplasman takımının kapsayıcı kutuları */
+    #fixtureList > div > div:last-child > div:first-child,
+    #fixtureList > div > div:last-child > div:last-child {
+        flex: 1 !important;
+        max-width: 38% !important; /* Kutuların dışarı taşmasını kesin olarak engeller */
+    }
+
+    /* Takım isimlerinin olduğu span etiketleri (Sihir burada) */
+    #fixtureList > div > div:last-child span[style*="font-weight: 600"] {
+        font-size: 11px !important; /* JS'teki 1.1em boyutunu mobilde ezüp küçültüyoruz */
+        white-space: nowrap !important; /* Yazının alt satıra geçmesini engeller */
+        overflow: hidden !important; /* Dışarı taşan kısmı keser */
+        text-overflow: ellipsis !important; /* Sığmazsa efendi gibi sonuna ... koyar */
+        display: inline-block !important;
+        max-width: 100% !important;
+    }
+
+    /* Ortadaki siyah Skor kutusunu da mobilde azıcık daraltalım ki takımlara yer açılsın */
+    #fixtureList > div > div:last-child > div:nth-child(2) {
+        font-size: 14px !important;
+        padding: 4px 6px !important;
+        min-width: 45px !important;
+        margin: 0 !important;
+    }
+}
