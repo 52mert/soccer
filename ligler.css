@@ -471,3 +471,29 @@ nav a.active { color: var(--accent) !important; border-bottom: 2px solid var(--a
         border-color: #cbd5e0 !important;
     }
 }
+/*
+Bu bloğu, mevcut CSS dosyanın en sonuna, diğer light mode tanımlarının altına ekle.
+Bu kod, aydınlık modda (güneş simgesi) bu bölümlerin doğru renkleri almasını sağlayacaktır.
+*/
+
+/* Aydınlık mode tanımları */
+[data-theme="light"] body {
+    /* Sayfanın genel arka planını aydınlatmak için */
+    background-color: var(--bg-main) !important;
+    /* Genel metin rengini koyulaştırmak için */
+    color: var(--text-main) !important;
+}
+
+/* Maç istatistikleri ve olayları gibi kartların kendisi */
+[data-theme="light"] .card { /* Değiştirilecek: "İstatistik" ve "Olaylar" kartlarının class'ı ne ise onu yaz */
+    /* Kartların arka planını aydınlatmak için */
+    background-color: var(--bg-card) !important;
+    /* Kartların içindeki metinleri koyulaştırmak için */
+    color: var(--text-main) !important;
+}
+
+/* Kartların içindeki text (p) ve başlık (h3) */
+[data-theme="light"] .card h3,
+[data-theme="light"] .card p {
+    color: var(--text-main) !important;
+}
