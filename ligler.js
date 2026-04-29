@@ -1,7 +1,7 @@
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_URL = 'https://xozwjuudbypmqewncdoo.supabase.co';
 
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; 
+const SUPABASE_KEY = 'sb_publishable_XeQN6Ha9dWfJ_SqjLUsx9A_DM-8ld4k'; 
 //supabase kutuphanesinden creatClient kullaniyoruz cunku uzunfetch istekleri atmamiza gerek yok
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
