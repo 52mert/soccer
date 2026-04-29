@@ -1298,3 +1298,43 @@ nav a.active {
         font-weight: bold !important;
     }
 }
+
+@media (max-width: 600px) {
+    /* Tabloyu otomatik genişliğe bırakıyoruz, en sağlıklısı bu */
+    .puan-tablosu {
+        table-layout: auto !important;
+        width: 100% !important;
+    }
+
+    /* Tüm hücreleri standart tablo hücresine çevirip JS'teki flex'i eziyoruz */
+    .puan-tablosu th, .puan-tablosu td {
+        padding: 10px 2px !important;
+        font-size: 12px !important;
+        display: table-cell !important; /* Flex iptal! */
+        vertical-align: middle !important;
+        text-align: center !important;
+        width: auto !important;
+    }
+    
+    /* Sadece Takım Sütunu (2. Sütun) */
+    .puan-tablosu th:nth-child(2),
+    .puan-tablosu td:nth-child(2) {
+        text-align: left !important;
+        max-width: 135px !important; /* Mobilde isme net bir sınır çiziyoruz */
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important; /* Sığmazsa efendi gibi ... koysun */
+    }
+
+    /* Logo ve İsimleri Flex Olmadan Yan Yana Dizme Taktikleri */
+    .puan-tablosu td:nth-child(2) img {
+        display: inline-block !important;
+        vertical-align: middle !important;
+        margin-right: 6px !important;
+    }
+
+    .puan-tablosu td:nth-child(2) strong {
+        display: inline !important;
+        vertical-align: middle !important;
+    }
+}
