@@ -242,3 +242,18 @@ nav a.active { color: var(--accent) !important; border-bottom: 2px solid var(--a
     #matchDetailView #selectedMatchHeader > div:nth-child(2) { font-size: 20px !important; min-width: 60px !important; }
     #matchDetailView #selectedMatchHeader p { font-size: 10px !important; }
 }
+
+/* ============================================================
+   MASAÜSTÜ KART ORTALAMA DÜZELTMESİ (PC İÇİN)
+   ============================================================ */
+@media (min-width: 601px) {
+    .league-grid {
+        display: grid !important;
+        /* Kartların genişliğini çok abartmadan, ekranın tam ortasında 2'li durmalarını sağlar */
+        grid-template-columns: repeat(2, minmax(350px, 480px)) !important; 
+        justify-content: center !important; /* Kart bloklarını ekranın tam merkezine iter */
+        gap: 25px !important; /* Kartlar arası boşluk */
+        width: 100% !important;
+        margin: 40px auto !important; /* Üstten biraz boşluk bırakıp ortalar */
+    }
+}
