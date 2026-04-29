@@ -493,7 +493,25 @@ Bu kod, aydınlık modda (güneş simgesi) bu bölümlerin doğru renkleri almas
 }
 
 /* Kartların içindeki text (p) ve başlık (h3) */
-[data-theme="light"] .card h3,
-[data-theme="light"] .card p {
-    color: var(--text-main) !important;
+/* ============================================================
+   AYDINLIK TEMA: EN ARKA PLAN VE "MS" KUTUCUĞU DÜZELTMESİ
+   ============================================================ */
+
+/* 1. Sayfanın en arkasında kalan o inatçı siyahlığı bembeyaz yapar */
+html[data-theme="light"],
+[data-theme="light"] body,
+[data-theme="light"] #leagueSelectionScene,
+[data-theme="light"] .league-grid {
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* 2. "MS" ve Maç Saati yazan karanlık kutucukları aydınlatır */
+[data-theme="light"] span[style*="background: #2a2a2a"],
+[data-theme="light"] span[style*="background:#2a2a2a"],
+[data-theme="light"] span[style*="color: #aaa"],
+[data-theme="light"] span[style*="color: #ddd"] {
+    background-color: #edf2f7 !important; /* Ferah açık gri arka plan */
+    color: #1a202c !important; /* Koyu okunabilir yazı */
+    font-weight: 800 !important;
 }
