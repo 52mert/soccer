@@ -1160,3 +1160,25 @@ nav a.active {
         margin: 0 4px !important;
     }
 }
+
+@media (max-width: 600px) {
+    /* 1. ADIM: TAKIM İSİMLERİ KESİLME VE BOŞLUK DÜZELTMESİ */
+    .puan-tablosu th:nth-child(2),
+    .puan-tablosu td:nth-child(2) {
+        width: 44% !important; /* Takım sütununa biraz daha nefes aldırıyoruz */
+    }
+
+    .puan-tablosu td:nth-child(2) {
+        display: flex !important;
+        align-items: center !important;
+        gap: 5px !important; /* JS'ten gelen 10px gap'i ezip logoyla isim arasındaki uçurumu kapatıyoruz */
+    }
+
+    .puan-tablosu td:nth-child(2) strong {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important; /* Yazı sığmazsa sonuna ... ekle */
+        flex: 1 !important; /* Kalan boşluğu tamamen doldur */
+        min-width: 0 !important; /* Flex içinde üç noktanın bozulmadan çalışmasını sağlayan altın kural! */
+    }
+}
