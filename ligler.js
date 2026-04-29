@@ -197,16 +197,25 @@ function changeSeason() {
 const themeToggle = document.getElementById('theme-toggle');
 const themeIcon = document.getElementById('theme-icon');
 
-// 1. BAŞLANGIÇ AYARI: Her zaman karanlık başlasın
-// LocalStorage'ı kontrol etmiyoruz (her zaman karanlık başlaması için), 
-// sadece mevcut durumu set ediyoruz.
-document.documentElement.setAttribute('data-theme', 'dark');
-themeIcon.innerText = '☀️'; // Karanlıkta güneş (aydınlığa geçmek için)
+const themeToggle = document.getElementById('theme-toggle');
+const themeIcon = document.getElementById('theme-icon');
 
+// 1. BAŞLANGIÇ AYARI: LocalStorage'ı kontrol et
+// Tarayıcı hafızasında kayıtlı bir tema varsa onu al, yoksa 'dark' (karanlık) başla.
+const savedTheme = localStorage.getItem('theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+
+// İkonu hafızadan gelen temaya göre ayarla
+themeIcon.innerText = savedTheme === 'light' ? '🌙' : '☀️';
+
+// 2. BUTONA TIKLANINCA
 themeToggle.addEventListener('click', () => {
-    // Mevcut temayı al
+    // Mevcut temayı al ve yenisini belirle
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    // YENİ: Seçilen temayı tarayıcının hafızasına (localStorage) kalıcı olarak kaydet!
+    localStorage.setItem('theme', newTheme);
     
     // Profesyonel Dönme Animasyonu Sınıfı Ekle
     themeToggle.classList.add('rotating');
@@ -214,11 +223,10 @@ themeToggle.addEventListener('click', () => {
     // Temayı Değiştir
     document.documentElement.setAttribute('data-theme', newTheme);
     
-    // İkonu Değiştir (Emoji kullanımı daha akıcıdır)
-    // Aydınlık modda 'Ay' (Geceye geçmek için), Karanlık modda 'Güneş'
+    // İkonu Değiştir (Dönüşün tam ortasında ikon değişsin)
     setTimeout(() => {
         themeIcon.innerText = (newTheme === 'light') ? '🌙' : '☀️';
-    }, 150); // Dönüşün tam ortasında ikon değişsin
+    }, 150); 
 
     // Animasyon bitince sınıfı kaldır
     setTimeout(() => {
