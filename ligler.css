@@ -294,3 +294,87 @@ nav a.active { color: var(--accent) !important; border-bottom: 2px solid var(--a
         margin: 0 !important;
     }
 }
+
+/* ============================================================
+   SADECE MOBİL: MAÇ DETAY (SKOR, OLAYLAR VE İSTATİSTİKLER)
+   ============================================================ */
+@media (max-width: 600px) {
+    /* --- 1. SKOR TABELASI (3 - 0 Yan yana kalacak) --- */
+    #selectedMatchHeader > div:last-child {
+        flex-wrap: nowrap !important;
+        justify-content: space-between !important;
+        gap: 5px !important;
+    }
+    
+    /* Ortadaki Siyah Skor Kutusu */
+    #selectedMatchHeader > div:last-child > div:nth-child(2) {
+        font-size: 24px !important; /* 36px'den 24px'e düşürdük */
+        padding: 6px 12px !important;
+        white-space: nowrap !important; /* Asla alt alta inmesin, yatay kalsın */
+        min-width: auto !important;
+        letter-spacing: 2px !important; /* Rakamlar arasına boşluk */
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Takım Logoları */
+    #selectedMatchHeader img {
+        width: 35px !important;
+        height: 35px !important;
+    }
+
+    /* Takım İsimleri */
+    #selectedMatchHeader p {
+        font-size: 10px !important;
+        margin-top: 5px !important;
+        max-width: 80px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important; /* Sığmazsa 3 nokta koysun */
+    }
+
+    /* --- 2. MAÇ OLAYLARI (Küçültme ve Kibar Görünüm) --- */
+    #eventsList > div {
+        padding-bottom: 6px !important;
+        margin-bottom: 6px !important;
+    }
+    
+    /* Dakika (Örn: 66') */
+    #eventsList > div > div:nth-child(1) {
+        font-size: 12px !important;
+        margin: 0 8px !important;
+        min-width: 25px !important;
+    }
+    
+    /* İkon (Oyuncu değişikliği, gol vb.) */
+    #eventsList > div > div:nth-child(2) {
+        font-size: 15px !important;
+        margin: 0 5px !important;
+    }
+    
+    /* Oyuncu İsmi */
+    #eventsList > div > div:nth-child(3) span {
+        font-size: 11px !important;
+    }
+    
+    /* Olay Detayı (Örn: Çıkan: X) */
+    #eventsList > div > div:nth-child(3) div {
+        font-size: 9px !important; /* Çok yer kaplamasın diye ufalttık */
+        color: #aaa !important;
+    }
+
+    /* Başlıklar (Maç Olayları / İstatistikler) */
+    #statsList h3, #eventsList h3 {
+        font-size: 14px !important;
+        margin-bottom: 10px !important;
+        padding-bottom: 5px !important;
+    }
+
+    /* --- 3. İSTATİSTİKLER (Yazıları Küçültme) --- */
+    /* "Topla Oynama", "İsabetli Şut" gibi etiketler ve rakamlar */
+    #statsList > div > div:first-child {
+        font-size: 11px !important;
+        margin-bottom: 3px !important;
+    }
+}
