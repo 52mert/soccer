@@ -314,7 +314,7 @@ async function fetchFixtures(leagueId, season) {
     // Verileri hafızaya al ve 1. Haftayı göster
     allFixtures = data;
     matchesPerWeek = (allFixtures.length === 306) ? 9 : 10; // 18 takımsa 9 maç, 20 takımsa 10 maç
-    currentWeek = 30; 
+    currentWeek = 1; 
     renderWeek(currentWeek);
 }
 
