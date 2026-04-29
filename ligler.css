@@ -1,4 +1,4 @@
-/* Lig Kartları Izgarası */
+ /* Lig Kartları Izgarası */
 .league-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -1161,108 +1161,180 @@ nav a.active {
     }
 }
 
-/* ============================================================
-   MOBİL GÖRÜNÜM (TEK VE KESİN ÇÖZÜM)
-   ============================================================ */
 @media (max-width: 600px) {
-    /* --- 1. ÜST BİLGİ ALANI --- */
-    .detail-header-row {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 15px !important;
-        text-align: center !important;
-    }
-    .detail-header-row .back-btn { align-self: flex-start !important; }
-
-    /* --- 2. PUAN TABLOSU --- */
-    .puan-tablosu {
-        table-layout: fixed !important; /* Yüzdelik dilimlerin çalışması için şart */
-        width: 100% !important;
+    /* 1. ADIM: TAKIM İSİMLERİ KESİLME VE BOŞLUK DÜZELTMESİ */
+    .puan-tablosu th:nth-child(2),
+    .puan-tablosu td:nth-child(2) {
+        width: 44% !important; /* Takım sütununa biraz daha nefes aldırıyoruz */
     }
 
-    /* Genel Hücre Ayarları */
-    .puan-tablosu th, .puan-tablosu td {
-        padding: 8px 1px !important;
-        font-size: 11px !important;
-        text-align: center !important;
-        vertical-align: middle !important;
-    }
-
-    /* Sütun 1: Sıra Numarası (#) */
-    .puan-tablosu th:nth-child(1), .puan-tablosu td:nth-child(1) { width: 7% !important; }
-    
-    /* Sütun 3, 4, 5, 6: O, G, B, M (Hepsi eşit ve dar) */
-    .puan-tablosu th:nth-child(3), .puan-tablosu td:nth-child(3),
-    .puan-tablosu th:nth-child(4), .puan-tablosu td:nth-child(4),
-    .puan-tablosu th:nth-child(5), .puan-tablosu td:nth-child(5),
-    .puan-tablosu th:nth-child(6), .puan-tablosu td:nth-child(6) { width: 9% !important; }
-
-    /* Sütun 7: Puan (P) */
-    .puan-tablosu th:nth-child(7), .puan-tablosu td:nth-child(7) { 
-        width: 11% !important; 
-        font-weight: bold !important; 
-    }
-
-    /* Sütun 2: TAKIM İSMİ (Kalan %46'lık devasa alan buranın) */
-    .puan-tablosu th:nth-child(2), .puan-tablosu td:nth-child(2) { 
-        width: 46% !important; 
-        max-width: none !important; /* Eski 130px kısıtlamaları tamamen iptal */
-        text-align: left !important;
-    }
-
-    /* Takım Logosu ve İsim Hizalaması (JS'teki Flex'i eziyoruz) */
     .puan-tablosu td:nth-child(2) {
         display: flex !important;
         align-items: center !important;
-        justify-content: flex-start !important;
-        gap: 4px !important; /* Logo ile yazı aralığı */
+        gap: 5px !important; /* JS'ten gelen 10px gap'i ezip logoyla isim arasındaki uçurumu kapatıyoruz */
+    }
+
+    .puan-tablosu td:nth-child(2) strong {
+        white-space: nowrap !important;
         overflow: hidden !important;
+        text-overflow: ellipsis !important; /* Yazı sığmazsa sonuna ... ekle */
+        flex: 1 !important; /* Kalan boşluğu tamamen doldur */
+        min-width: 0 !important; /* Flex içinde üç noktanın bozulmadan çalışmasını sağlayan altın kural! */
+    }
+}
+
+
+@media (max-width: 600px) {
+    /* Tabloyu tam %100 genişliğe sabitleyip kontrolü elimize alıyoruz */
+    .puan-tablosu {
+        table-layout: fixed !important;
+        width: 100% !important;
     }
 
-    /* Logo küçülmesin diye sabitliyoruz */
-    .puan-tablosu td:nth-child(2) img {
-        width: 18px !important;
-        height: 18px !important;
-        flex-shrink: 0 !important; 
+    /* Hücre içlerindeki boşlukları (padding) minimuma indirip alanı genişletiyoruz */
+    .puan-tablosu th, .puan-tablosu td {
+        padding: 8px 1px !important;
+        font-size: 11px !important; /* Rakamlar net okunur ama taşmaz */
+        text-align: center !important;
     }
 
-    /* Yazı sığmazsa 3 nokta (...) koysun, saçma sapan kesilmesin */
+    /* 1. Sütun: Sıra Numarası (#) */
+    .puan-tablosu th:nth-child(1), .puan-tablosu td:nth-child(1) {
+        width: 6% !important;
+    }
+
+    /* 2. Sütun: TAKIM İSMİ - Alanın %44'ü buranın */
+    .puan-tablosu th:nth-child(2), .puan-tablosu td:nth-child(2) {
+        width: 44% !important;
+        text-align: left !important;
+    }
+
+    /* Logo ve takım isminin hizalaması */
+    .puan-tablosu td:nth-child(2) {
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important; /* Logo ile yazı arası boşluğu iyice kıstık */
+    }
+
     .puan-tablosu td:nth-child(2) strong {
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
-        font-size: 11px !important;
         flex-grow: 1 !important;
-        min-width: 0 !important; /* İŞTE HAYAT KURTARAN KOD BURASI! */
+        min-width: 0 !important;
+        font-size: 12px !important; /* İsim rakamlara göre bir tık daha büyük */
     }
 
-    /* --- 3. FİKSTÜR DÜZELTMESİ --- */
-    #fixtureList > div > div:last-child { flex-wrap: nowrap !important; }
-    
-    #fixtureList > div > div:last-child > div:first-child,
-    #fixtureList > div > div:last-child > div:last-child {
+    /* 3, 4, 5, 6. Sütunlar: O, G, B, M - Hepsine net ve eşit alan veriyoruz */
+    .puan-tablosu th:nth-child(3), .puan-tablosu td:nth-child(3),
+    .puan-tablosu th:nth-child(4), .puan-tablosu td:nth-child(4),
+    .puan-tablosu th:nth-child(5), .puan-tablosu td:nth-child(5),
+    .puan-tablosu th:nth-child(6), .puan-tablosu td:nth-child(6) {
+        width: 10% !important;
+    }
+
+    /* 7. Sütun: Puan (P) */
+    .puan-tablosu th:nth-child(7), .puan-tablosu td:nth-child(7) {
+        width: 10% !important;
+        font-weight: bold !important;
+    }
+}
+
+
+@media (max-width: 600px) {
+    /* Tablo genişliği sabitlemesi */
+    .puan-tablosu {
+        table-layout: fixed !important;
+        width: 100% !important;
+    }
+
+    /* Genel hücre boşlukları (Daraltıldı) */
+    .puan-tablosu th, .puan-tablosu td {
+        padding: 8px 1px !important;
         font-size: 11px !important;
-        max-width: 35% !important;
+        text-align: center !important;
+    }
+
+    /* 1. Sütun: Sıra Numarası (#) */
+    .puan-tablosu th:nth-child(1), .puan-tablosu td:nth-child(1) {
+        width: 6% !important;
+    }
+
+    /* 2. Sütun: TAKIM İSMİ (İşte aradaki boşluğu kapatacak ve kesilmeyi önleyecek kısım) */
+    .puan-tablosu th:nth-child(2), .puan-tablosu td:nth-child(2) {
+        width: 44% !important;
+        max-width: none !important; /* ESKİ 130PX SINIRINI BURADA İPTAL EDİYORUZ! */
+        text-align: left !important;
+    }
+
+    /* Logo ve metin hizalaması */
+    .puan-tablosu td:nth-child(2) {
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+    }
+
+    /* İsmin sığdığı kadar uzayıp taşarsa ... olması için */
+    .puan-tablosu td:nth-child(2) strong {
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
+        flex-grow: 1 !important;
+        min-width: 0 !important;
+        font-size: 12px !important;
+    }
+
+    /* 3, 4, 5, 6. Sütunlar: O, G, B, M */
+    .puan-tablosu th:nth-child(3), .puan-tablosu td:nth-child(3),
+    .puan-tablosu th:nth-child(4), .puan-tablosu td:nth-child(4),
+    .puan-tablosu th:nth-child(5), .puan-tablosu td:nth-child(5),
+    .puan-tablosu th:nth-child(6), .puan-tablosu td:nth-child(6) {
+        width: 10% !important;
+    }
+
+    /* 7. Sütun: Puan (P) */
+    .puan-tablosu th:nth-child(7), .puan-tablosu td:nth-child(7) {
+        width: 10% !important;
+        font-weight: bold !important;
+    }
+}
+
+@media (max-width: 600px) {
+    /* Tabloyu otomatik genişliğe bırakıyoruz, en sağlıklısı bu */
+    .puan-tablosu {
+        table-layout: auto !important;
+        width: 100% !important;
+    }
+
+    /* Tüm hücreleri standart tablo hücresine çevirip JS'teki flex'i eziyoruz */
+    .puan-tablosu th, .puan-tablosu td {
+        padding: 10px 2px !important;
+        font-size: 12px !important;
+        display: table-cell !important; /* Flex iptal! */
+        vertical-align: middle !important;
+        text-align: center !important;
+        width: auto !important;
     }
     
-    /* Ortadaki Skor Kutusu */
-    #fixtureList > div > div:last-child > div:nth-child(2) {
-        font-size: 14px !important;
-        padding: 4px 6px !important;
-        min-width: 45px !important;
+    /* Sadece Takım Sütunu (2. Sütun) */
+    .puan-tablosu th:nth-child(2),
+    .puan-tablosu td:nth-child(2) {
+        text-align: left !important;
+        max-width: 135px !important; /* Mobilde isme net bir sınır çiziyoruz */
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important; /* Sığmazsa efendi gibi ... koysun */
     }
-    
-    /* Maç Detay Üst Başlık (Alt alta inmesin) */
-    #matchDetailView #selectedMatchHeader { 
-        flex-direction: row !important; 
-        padding: 10px 5px !important;
+
+    /* Logo ve İsimleri Flex Olmadan Yan Yana Dizme Taktikleri */
+    .puan-tablosu td:nth-child(2) img {
+        display: inline-block !important;
+        vertical-align: middle !important;
+        margin-right: 6px !important;
     }
-    #matchDetailView #selectedMatchHeader > div:nth-child(2) {
-        font-size: 20px !important;
-        min-width: 60px !important;
+
+    .puan-tablosu td:nth-child(2) strong {
+        display: inline !important;
+        vertical-align: middle !important;
     }
-    #matchDetailView #selectedMatchHeader p { font-size: 10px !important; }
 } 
