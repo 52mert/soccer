@@ -378,3 +378,87 @@ nav a.active { color: var(--accent) !important; border-bottom: 2px solid var(--a
         margin-bottom: 3px !important;
     }
 }
+
+/* ============================================================
+   AYDINLIK TEMA (LIGHT MODE) KESİN ÇÖZÜMÜ
+   JS'ten gelen inatçı satıriçi (inline) karanlık renkleri ezer!
+   ============================================================ */
+[data-theme="light"] {
+    /* 1. FİKSTÜR LİSTESİNDEKİ KARTLAR VE YAZILAR */
+    #fixtureList > div {
+        background: #ffffff !important;
+        border-color: #cbd5e0 !important;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
+    }
+    
+    /* Fikstürdeki takım isimleri ve tarihler */
+    #fixtureList > div span[style*="color: #eee"],
+    #fixtureList > div span[style*="color: #777"] {
+        color: #1a202c !important; 
+    }
+    
+    /* Fikstür Ortadaki Skor Kutusu (Örn: 2 - 1) */
+    #fixtureList > div > div:last-child > div:nth-child(2) {
+        background: #edf2f7 !important;
+        border-color: #cbd5e0 !important;
+        color: #1a202c !important;
+    }
+
+    /* 2. MAÇ DETAY BÖLÜMÜ (Skor, İstatistik ve Olayların Arkaplanı) */
+    #selectedMatchHeader, 
+    #statsList, 
+    #eventsList {
+        background: #ffffff !important;
+        border-color: #cbd5e0 !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+    }
+
+    /* Maç Detay İçindeki Beyaz Kalan Yazılar */
+    #selectedMatchHeader p, 
+    #statsList h3, 
+    #eventsList h3,
+    #statsList div[style*="color: #eee"],
+    #eventsList span[style*="color:#eee"] {
+        color: #1a202c !important;
+    }
+
+    /* Maç Detay Dev Skor Kutusu (3 - 0) */
+    #selectedMatchHeader > div > div[style*="background: #0c0c0c"],
+    #selectedMatchHeader > div > div:nth-child(2) {
+        background: #edf2f7 !important;
+        color: #1a202c !important;
+        border-color: #cbd5e0 !important;
+    }
+
+    /* İstatistik Çubukları (Siyah arka planı gri yapma) */
+    #statsList > div > div:nth-child(2) {
+        background: #e2e8f0 !important;
+    }
+
+    /* Maç Olaylarındaki Çizgiler */
+    #eventsList > div {
+        border-bottom-color: #edf2f7 !important;
+    }
+
+    /* 3. SEKMELER (Puan Durumu / Fikstür) VE HAFTA KONTROLLERİ */
+    .tab-menu button[style*="background: #333"] {
+        background: #edf2f7 !important;
+        color: #1a202c !important;
+    }
+    
+    /* 1. Hafta, 2. Hafta yazan siyah bar */
+    .week-controls {
+        background: #edf2f7 !important;
+        border-color: #cbd5e0 !important;
+    }
+    .week-controls h3 {
+        color: #1a202c !important;
+    }
+    
+    /* Geri Dön / Fikstüre Dön Butonu İçin Sabitleme */
+    .back-btn[style*="background: #333"] {
+        background: #ffffff !important;
+        color: #1a202c !important;
+        border-color: #cbd5e0 !important;
+    }
+}
