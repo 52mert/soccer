@@ -1,5 +1,5 @@
 // 1. Supabase Bağlantısı
-const SUPABASE_URL = "https://xozwjuudbypmqewncdoo.supabase.co";
+const SUPABASE_URL = process.env.SUPABASE_URL;
 // Publishable Key'i buraya yapıştır kanka
 const SUPABASE_KEY = "sb_publishable_XeQN6Ha9dWfJ_SqjLUsx9A_DM-8ld4k"; 
 
