@@ -246,15 +246,24 @@ nav a.active { color: var(--accent) !important; border-bottom: 2px solid var(--a
 /* ============================================================
    MASAÜSTÜ KART ORTALAMA DÜZELTMESİ (PC İÇİN)
    ============================================================ */
+/* ============================================================
+   MASAÜSTÜ KART ORTALAMA DÜZELTMESİ (PC İÇİN)
+   ============================================================ */
 @media (min-width: 601px) {
     .league-grid {
-        display: grid !important;
-        /* Kartların genişliğini çok abartmadan, ekranın tam ortasında 2'li durmalarını sağlar */
+        /* DİKKAT: display: grid; yanındaki !important yazısını sildik! 
+           Böylece JS tıklandığında burayı rahatça gizleyebilecek. */
+        display: grid;
         grid-template-columns: repeat(2, minmax(350px, 480px)) !important; 
-        justify-content: center !important; /* Kart bloklarını ekranın tam merkezine iter */
-        gap: 25px !important; /* Kartlar arası boşluk */
+        justify-content: center !important; 
+        gap: 25px !important; 
         width: 100% !important;
-        margin: 40px auto !important; /* Üstten biraz boşluk bırakıp ortalar */
+        margin: 40px auto !important; 
+    }
+
+    /* JavaScript gizle dediğinde %100 gizlenmesini garantiye alan güvenlik kodu */
+    .league-grid[style*="display: none"] {
+        display: none !important;
     }
 }
 
