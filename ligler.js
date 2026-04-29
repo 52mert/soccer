@@ -1,8 +1,8 @@
-// 1. Supabase Bağlantısı
-const SUPABASE_URL = process.env.SUPABASE_URL;
-// Publishable Key'i buraya yapıştır kanka
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; 
 
+const SUPABASE_URL = process.env.SUPABASE_URL;
+
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; 
+//supabase kutuphanesinden creatClient kullaniyoruz cunku uzunfetch istekleri atmamiza gerek yok
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentLeagueId = null;
@@ -30,15 +30,12 @@ async function selectLeague(leagueId) {
     const title = document.getElementById("leagueTitle");
     if(title) title.innerText = leagueNames[leagueId] || "Lig Detayı";
 
-    // Veriyi Çek
     const season = document.getElementById("seasonSelect").value;
     fetchStandings(leagueId, season);
 }
 
-// 3. Veri Çekme Motoru
-// 3. Veri Çekme Motoru (Algoritmik Versiyon)
-// 3. Veri Çekme Motoru (CANLI DESTEKLİ PROFESYONEL VERSİYON)
-// 3. Veri Çekme Motoru (CANLI DESTEKLİ PROFESYONEL VERSİYON)
+
+// 3. Veri Çekme Motoru (CANLI DESTEKLİ)
 async function fetchStandings(leagueId, season) {
     const tbody = document.getElementById("standingBody");
     if(!tbody) return;
