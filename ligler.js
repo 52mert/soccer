@@ -309,8 +309,15 @@ async function fetchFixtures(leagueId, season) {
 }
 
 function renderWeek(weekNum) {
+
     const fixtureList = document.getElementById("fixtureList");
+
+  
+
+    // YENİSİ: Artık select menümüzü yakalıyoruz:
+
     const haftaSecici = document.getElementById("haftaSecici"); 
+
     const btnGuncelHafta = document.getElementById("btnGuncelHafta"); // Butonu yakalıyoruz
     
     // --- GÜNCEL HAFTA BUTONU GÖZÜKME/GİZLENME MANTIĞI ---
@@ -323,82 +330,154 @@ function renderWeek(weekNum) {
             btnGuncelHafta.style.display = "none"; // Eski sezonlarda gizle
         }
     }
-    
+
     const totalWeeks = Math.ceil(allFixtures.length / matchesPerWeek);
+
     
+
     if (weekNum < 1) currentWeek = 1;
+
     if (weekNum > totalWeeks) currentWeek = totalWeeks;
 
+
+
+    // ESKİSİ: weekDisplay.innerText = `${currentWeek}. Hafta`;
+
+    // YENİSİ: Select menüsünün seçili değerini güncelliyoruz
+
     if (haftaSecici) {
+
         haftaSecici.value = currentWeek; 
+
     }
 
+
+
     const startIndex = (currentWeek - 1) * matchesPerWeek;
+
     const endIndex = startIndex + matchesPerWeek;
+
     const weeklyMatches = allFixtures.slice(startIndex, endIndex);
+
+
 
     fixtureList.innerHTML = ""; 
 
+
+
     weeklyMatches.forEach(mac => {
+
         // --- CANLI SKOR VE DAKİKA MANTIĞI ---
-        const isLive = mac.elapsed !== null; 
-        const isFinished = ['FT', 'AET', 'PEN'].includes(mac.status); 
+
+        const isLive = mac.elapsed !== null; // Dakika varsa maç canlıdır
+
+        const isFinished = ['FT', 'AET', 'PEN'].includes(mac.status); // Bitti mi?
+
+
 
         let scoreDisplay = '-';
+
         let saatBadge = '';
+
         let colorDisplay = '#555';
 
+
+
         let macTarihi = mac.match_date_text || "Tarih Belirsiz";
+
         let macSaati = (mac.match_time && mac.match_time !== "Belirsiz") ? mac.match_time : ""; 
 
+
+
         if (isFinished) {
+
             scoreDisplay = `${mac.home_score} - ${mac.away_score}`;
+
             colorDisplay = '#00ff00';
+
             saatBadge = `<span style="background: #2a2a2a; color: #aaa; padding: 4px 10px; border-radius: 6px; font-size: 0.85em; font-weight: bold;">MS</span>`;
+
         } else if (isLive) {
+
             scoreDisplay = `${mac.home_score} - ${mac.away_score}`;
+
             colorDisplay = '#ff3b30';
+
             saatBadge = `<span style="color: #ff3b30; padding: 4px 10px; font-weight: 900; font-size: 0.9em; animation: blinker 1.5s linear infinite;">${mac.elapsed}' <span style="font-size: 0.7em;">🔴</span></span>`;
+
         } else {
+
             saatBadge = macSaati ? `<span style="background: #2a2a2a; color: #ddd; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 0.85em;">${macSaati}</span>` : '';
+
         }
+
         
+
         const hLogo = mac.home_team_logo || 'https://via.placeholder.com/30?text=?';
+
         const aLogo = mac.away_team_logo || 'https://via.placeholder.com/30?text=?';
 
+
+
         fixtureList.innerHTML += `
+
          <div onclick="showMatchDetails('${mac.id}')" style="display: flex; flex-direction: column; background: #161616; padding: 16px; border-radius: 12px; border: 1px solid #222; margin-bottom: 12px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='#00ff00'" onmouseout="this.style.borderColor='#222'">    
+
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #222;">
+
                     <span style="color: #777; font-size: 0.8em; font-weight: 700; text-transform: uppercase;">
+
                         ${macTarihi}
+
                     </span>
+
                     ${saatBadge}
+
                 </div>
 
+
+
                 <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+
                     <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 12px;">
+
                         <span style="font-weight: 600; font-size: 1.1em; color: #eee; text-align: right;">${mac.home_team_name}</span>
+
                         <img src="${hLogo}" style="width: 32px; height: 32px; object-fit: contain;">
+
                     </div>
+
                     
+
                     <div style="margin: 0 10px; padding: 8px 18px; background: #0c0c0c; border-radius: 8px; font-weight: 700; font-size: 1.3em; color: ${colorDisplay}; text-align: center; min-width: 80px; border: 1px solid #1a1a1a;">
+
                         ${scoreDisplay}
+
                     </div>
+
                     
+
                     <div style="flex: 1; display: flex; align-items: center; justify-content: flex-start; gap: 12px;">
+
                         <img src="${aLogo}" style="width: 32px; height: 32px; object-fit: contain;">
+
                         <span style="font-weight: 600; font-size: 1.1em; color: #eee; text-align: left;">${mac.away_team_name}</span>
+
                     </div>
+
                 </div>
+
             </div>
+
         `;
+
     });
-    
-    // Ufak bir uyarı: initHaftaSecici()'yi burada çağırmak çalışır ama
-    // butonlara her tıkladığında select menüsünü baştan yaratır.
-    // İdeal olanı bunu verileri API'den çektiğin zaman (fetch sonrası) 1 kere çağırmandır!
+
     initHaftaSecici();
+
 }
+    
+  
 function initHaftaSecici() {
     const haftaSecici = document.getElementById("haftaSecici");
     if (!haftaSecici) return; // HTML'de yoksa hata vermesin diye güvenlik önlemi
