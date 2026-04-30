@@ -318,18 +318,7 @@ function renderWeek(weekNum) {
 
     const haftaSecici = document.getElementById("haftaSecici"); 
 
-    const btnGuncelHafta = document.getElementById("btnGuncelHafta"); // Butonu yakalıyoruz
-    
-    // --- GÜNCEL HAFTA BUTONU GÖZÜKME/GİZLENME MANTIĞI ---
-    if (btnGuncelHafta) {
-        // "secilenSezon" değişkenini kendi kodundaki sezon değişkeniyle değiştir
-        // Eğer formatın "2025-2026" şeklindeyse şartı secilenSezon === "2025-2026" yapabilirsin
-        if (secilenSezon == "2025" || secilenSezon == 2025) { 
-            btnGuncelHafta.style.display = "inline-block"; // 2025 ise göster
-        } else {
-            btnGuncelHafta.style.display = "none"; // Eski sezonlarda gizle
-        }
-    }
+  
 
     const totalWeeks = Math.ceil(allFixtures.length / matchesPerWeek);
 
