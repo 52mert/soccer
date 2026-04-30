@@ -513,26 +513,36 @@ function showMatchDetails(matchId) {
     if (olayData.length > 0) {
         const tumOlaylar = [...olayData].sort((a, b) => a.time.elapsed - b.time.elapsed);
 
-        tumOlaylar.forEach(event => {
-            const isHome = event.team.name === match.home_team_name;
-            const flexDir = isHome ? "row" : "row-reverse";
-            const textAlign = isHome ? "left" : "right";
+       tumOlaylar.forEach(event => {
+    const isHome = event.team.name === match.home_team_name;
+    const flexDir = isHome ? "row" : "row-reverse";
+    const textAlign = isHome ? "left" : "right";
 
-            let icon = "📌"; 
-            let detail = ""; 
-            
-            if (event.type === "Goal") {
-                icon = "⚽";
-                if (event.assist.name) detail = `(Asist: ${event.assist.name})`;
-                if (event.detail === "Own Goal") detail = "(Kendi Kalesine)";
-                if (event.detail === "Penalty") detail = "(Penaltı)";
-            } else if (event.type === "subst") {
-                icon = "🔄";
-                if (event.assist.name) detail = `(Çıkan: ${event.assist.name})`;
-            } else if (event.type === "Card") {
-                icon = event.detail.includes("Red") ? "🟥" : "🟨"; 
-            }
-
+    let icon = "📌"; 
+    let detail = ""; 
+    
+    if (event.type === "Goal") {
+        // Eğer kaçan penaltıysa:
+        if (event.detail === "Missed Penalty") {
+            icon = "❌"; // İstersen bunu "⚽❌" yapabilirsin
+            detail = "(Kaçan Penaltı)";
+        } else {
+            // Normal gol, kendi kalesine veya normal penaltıysa:
+            icon = "⚽";
+            if (event.assist && event.assist.name) detail = `(Asist: ${event.assist.name})`;
+            if (event.detail === "Own Goal") detail = "(Kendi Kalesine)";
+            if (event.detail === "Penalty") detail = "(Penaltı)";
+        }
+    } else if (event.type === "subst") {
+        icon = "🔄";
+        if (event.assist && event.assist.name) detail = `(Çıkan: ${event.assist.name})`;
+    } else if (event.type === "Card") {
+        icon = event.detail.includes("Red") ? "🟥" : "🟨"; 
+    } else if (event.type === "Var") {
+        // VAR iptalleri için ekstra kontrol
+        icon = "📺";
+        if (event.detail.includes("Goal Disallowed")) detail = "(İptal Edilen Gol)";
+    }
             const displayMinute = event.time.extra ? `${event.time.elapsed}+${event.time.extra}` : event.time.elapsed;
 
             eventsList.innerHTML += `
