@@ -310,17 +310,25 @@ async function fetchFixtures(leagueId, season) {
 
 function renderWeek(weekNum) {
     const fixtureList = document.getElementById("fixtureList");
-    // ESKİSİ: const weekDisplay = document.getElementById("currentWeekDisplay");
-    // YENİSİ: Artık select menümüzü yakalıyoruz:
     const haftaSecici = document.getElementById("haftaSecici"); 
+    const btnGuncelHafta = document.getElementById("btnGuncelHafta"); // Butonu yakalıyoruz
+    
+    // --- GÜNCEL HAFTA BUTONU GÖZÜKME/GİZLENME MANTIĞI ---
+    if (btnGuncelHafta) {
+        // "secilenSezon" değişkenini kendi kodundaki sezon değişkeniyle değiştir
+        // Eğer formatın "2025-2026" şeklindeyse şartı secilenSezon === "2025-2026" yapabilirsin
+        if (secilenSezon == "2025" || secilenSezon == 2025) { 
+            btnGuncelHafta.style.display = "inline-block"; // 2025 ise göster
+        } else {
+            btnGuncelHafta.style.display = "none"; // Eski sezonlarda gizle
+        }
+    }
     
     const totalWeeks = Math.ceil(allFixtures.length / matchesPerWeek);
     
     if (weekNum < 1) currentWeek = 1;
     if (weekNum > totalWeeks) currentWeek = totalWeeks;
 
-    // ESKİSİ: weekDisplay.innerText = `${currentWeek}. Hafta`;
-    // YENİSİ: Select menüsünün seçili değerini güncelliyoruz
     if (haftaSecici) {
         haftaSecici.value = currentWeek; 
     }
@@ -333,8 +341,8 @@ function renderWeek(weekNum) {
 
     weeklyMatches.forEach(mac => {
         // --- CANLI SKOR VE DAKİKA MANTIĞI ---
-        const isLive = mac.elapsed !== null; // Dakika varsa maç canlıdır
-        const isFinished = ['FT', 'AET', 'PEN'].includes(mac.status); // Bitti mi?
+        const isLive = mac.elapsed !== null; 
+        const isFinished = ['FT', 'AET', 'PEN'].includes(mac.status); 
 
         let scoreDisplay = '-';
         let saatBadge = '';
@@ -385,6 +393,10 @@ function renderWeek(weekNum) {
             </div>
         `;
     });
+    
+    // Ufak bir uyarı: initHaftaSecici()'yi burada çağırmak çalışır ama
+    // butonlara her tıkladığında select menüsünü baştan yaratır.
+    // İdeal olanı bunu verileri API'den çektiğin zaman (fetch sonrası) 1 kere çağırmandır!
     initHaftaSecici();
 }
 function initHaftaSecici() {
