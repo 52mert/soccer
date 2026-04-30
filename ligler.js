@@ -427,7 +427,10 @@ function seciliHaftayiGetir(secilenDeger) {
     renderWeek(currentWeek); // Ekranı yeni haftaya göre çizdir
 }
 
-
+function guncelHaftayaDon(){
+    const a1=32;
+    renderWeek(a1);
+}
 
 // 4. İleri/Geri Butonları İçin Fonksiyon
 function changeWeek(direction) {
