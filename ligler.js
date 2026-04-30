@@ -308,18 +308,22 @@ async function fetchFixtures(leagueId, season) {
     renderWeek(currentWeek);
 }
 
-
-// 3. İlgili Haftanın Maçlarını Ekrana Bas (CANLI DAKİKA DESTEKLİ)
 function renderWeek(weekNum) {
     const fixtureList = document.getElementById("fixtureList");
-    const weekDisplay = document.getElementById("currentWeekDisplay");
+    // ESKİSİ: const weekDisplay = document.getElementById("currentWeekDisplay");
+    // YENİSİ: Artık select menümüzü yakalıyoruz:
+    const haftaSecici = document.getElementById("haftaSecici"); 
     
     const totalWeeks = Math.ceil(allFixtures.length / matchesPerWeek);
     
     if (weekNum < 1) currentWeek = 1;
     if (weekNum > totalWeeks) currentWeek = totalWeeks;
 
-    weekDisplay.innerText = `${currentWeek}. Hafta`;
+    // ESKİSİ: weekDisplay.innerText = `${currentWeek}. Hafta`;
+    // YENİSİ: Select menüsünün seçili değerini güncelliyoruz
+    if (haftaSecici) {
+        haftaSecici.value = currentWeek; 
+    }
 
     const startIndex = (currentWeek - 1) * matchesPerWeek;
     const endIndex = startIndex + matchesPerWeek;
@@ -354,7 +358,6 @@ function renderWeek(weekNum) {
         const hLogo = mac.home_team_logo || 'https://via.placeholder.com/30?text=?';
         const aLogo = mac.away_team_logo || 'https://via.placeholder.com/30?text=?';
 
-        // SİHİR BURADA: onclick içine '${mac.id}' diyerek tek tırnak ekledik!
         fixtureList.innerHTML += `
          <div onclick="showMatchDetails('${mac.id}')" style="display: flex; flex-direction: column; background: #161616; padding: 16px; border-radius: 12px; border: 1px solid #222; margin-bottom: 12px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='#00ff00'" onmouseout="this.style.borderColor='#222'">    
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #222;">
@@ -383,7 +386,6 @@ function renderWeek(weekNum) {
         `;
     });
 }
-
 // 4. İleri/Geri Butonları İçin Fonksiyon
 function changeWeek(direction) {
     if (allFixtures.length === 0) return;
