@@ -148,6 +148,7 @@ async function fetchStandings(leagueId, season) {
                     <td>${team.b}</td>
                     <td>${team.m}</td>
                     <td style="color: #00ff00; font-weight: bold;">${team.puan}</td>
+                    <td>${team.averaj}</td>
                 </tr>`;
         });
     } 
