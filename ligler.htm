@@ -83,15 +83,38 @@
             </table>
         </div>
 
-     <div id="fixturesView" class="table-card" style="display: none;">
-            <div class="week-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #222; padding: 10px; border-radius: 8px;">
-                <button onclick="changeWeek(-1)" style="padding: 5px 15px; cursor: pointer; border:none; border-radius: 5px;">◀ Önceki</button>
-                <h3 id="currentWeekDisplay" style="margin: 0; color: #fff;">1. Hafta</h3>
-                <button onclick="changeWeek(1)" style="padding: 5px 15px; cursor: pointer; border:none; border-radius: 5px;">Sonraki ▶</button>
-            </div>
-            <div id="fixtureList" style="display: flex; flex-direction: column; gap: 10px;">
-            </div>
-        </div>
+    <div id="fixturesView" class="table-card" style="display: none;">
+    
+    <!-- Hafta Navigasyon Barı -->
+    <div class="week-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background: #222; padding: 10px; border-radius: 8px;">
+        
+        <button onclick="changeWeek(-1)" style="padding: 8px 12px; cursor: pointer; border:none; border-radius: 5px; background-color: #eee; color: #111; font-weight: bold;">
+            ◀ Önceki
+        </button>
+        
+        <!-- h3 yerine gelen Select menüsü -->
+        <!-- JS tarafında onchange ile seçilen haftayı yakalayabilirsin -->
+        <select id="haftaSecici" onchange="seciliHaftayiGetir(this.value)" style="background-color: #333; color: white; border: 1px solid #555; padding: 8px 15px; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; outline: none; text-align: center;">
+            <!-- JS ile içerisine <option value="1">1. Hafta</option> vb. basılacak -->
+        </select>
+
+        <button onclick="changeWeek(1)" style="padding: 8px 12px; cursor: pointer; border:none; border-radius: 5px; background-color: #eee; color: #111; font-weight: bold;">
+            Sonraki ▶
+        </button>
+    </div>
+
+    <!-- Güncel Haftaya Git Butonu -->
+    <div style="text-align: center; margin-bottom: 15px;">
+        <button id="btnGuncelHafta" onclick="guncelHaftayaDon()" style="background-color: #00ff00; color: #111; border: none; padding: 6px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px;">
+            📍 Güncel Haftaya Git
+        </button>
+    </div>
+
+    <!-- Maçların Listelendiği Alan -->
+    <div id="fixtureList" style="display: flex; flex-direction: column; gap: 10px;">
+    </div>
+
+</div>
 
         <div id="matchDetailView" class="table-card" style="display: none; padding: 20px;">
             <button onclick="closeMatchDetails()" class="back-btn" style="margin-bottom: 20px; background: #333; color: white; border: 1px solid #555; padding: 8px 15px; border-radius: 5px; cursor: pointer;">
