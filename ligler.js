@@ -477,7 +477,7 @@ function renderWeek(weekNum) {
 function guncelHaftayaDon() {
     // Şimdilik güncel haftayı 28 olarak belirliyoruz.
     // İleride API'den dinamik olarak hangi haftada olduğumuzu çektiğinde burayı güncelleyebilirsin.
-    const guncelHaftaDegeri = 28; 
+    const guncelHaftaDegeri = 32; 
     
     currentWeek = guncelHaftaDegeri;
     renderWeek(currentWeek);
