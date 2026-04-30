@@ -311,12 +311,19 @@ async function fetchFixtures(leagueId, season) {
 function renderWeek(weekNum) {
 
     const fixtureList = document.getElementById("fixtureList");
-
-  
-
-    // YENİSİ: Artık select menümüzü yakalıyoruz:
-
     const haftaSecici = document.getElementById("haftaSecici"); 
+    const btnGuncelHafta = document.getElementById("btnGuncelHafta");
+    const seasonSelect = document.getElementById("seasonSelect"); // Doğru ID eklendi!
+
+    // --- GÜNCEL HAFTA BUTONU GİZLEME/GÖSTERME ---
+    if (btnGuncelHafta && seasonSelect) {
+        // HTML'deki select değeri "2025" ise butonu göster, değilse gizle
+        if (seasonSelect.value === "2025") {
+            btnGuncelHafta.style.display = "inline-block";
+        } else {
+            btnGuncelHafta.style.display = "none";
+        }
+    }
 
   
 
@@ -464,6 +471,16 @@ function renderWeek(weekNum) {
 
     initHaftaSecici();
 
+}
+
+// Güncel Haftaya Git Fonksiyonu
+function guncelHaftayaDon() {
+    // Şimdilik güncel haftayı 28 olarak belirliyoruz.
+    // İleride API'den dinamik olarak hangi haftada olduğumuzu çektiğinde burayı güncelleyebilirsin.
+    const guncelHaftaDegeri = 28; 
+    
+    currentWeek = guncelHaftaDegeri;
+    renderWeek(currentWeek);
 }
     
   
