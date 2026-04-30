@@ -416,7 +416,8 @@ function seciliHaftayiGetir(secilenDeger) {
 }
 
 function guncelHaftayaDon(){
-    renderWeek(32);
+    int a=32;
+    renderWeek(a);
 }
 
 // 4. İleri/Geri Butonları İçin Fonksiyon
