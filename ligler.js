@@ -40,7 +40,7 @@ async function fetchStandings(leagueId, season) {
     const tbody = document.getElementById("standingBody");
     if(!tbody) return;
     
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">🔄 Puan Durumu Hesaplanıyor...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">🔄 Puan Durumu Hesaplanıyor... alooo</td></tr>';
 
     let finalData = [];
 
