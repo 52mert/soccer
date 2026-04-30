@@ -204,12 +204,6 @@ function changeSeason() {
 const themeToggle = document.getElementById('theme-toggle');
 const themeIcon = document.getElementById('theme-icon');
 
-// 1. BAŞLANGIÇ AYARI: Her zaman karanlık başlasın
-
-// LocalStorage'ı kontrol etmiyoruz (her zaman karanlık başlaması için), 
-
-// sadece mevcut durumu set ediyoruz.
-
 document.documentElement.setAttribute('data-theme', 'dark');
 
 themeIcon.innerText = '☀️'; // Karanlıkta güneş (aydınlığa geçmek için)
@@ -230,17 +224,9 @@ themeToggle.addEventListener('click', () => {
 
     themeToggle.classList.add('rotating');
 
-    
-
     // Temayı Değiştir
 
     document.documentElement.setAttribute('data-theme', newTheme);
-
-    
-
-    // İkonu Değiştir (Emoji kullanımı daha akıcıdır)
-
-    // Aydınlık modda 'Ay' (Geceye geçmek için), Karanlık modda 'Güneş'
 
     setTimeout(() => {
 
@@ -248,9 +234,6 @@ themeToggle.addEventListener('click', () => {
 
     }, 150); // Dönüşün tam ortasında ikon değişsin
 
-
-
-    // Animasyon bitince sınıfı kaldır
 
     setTimeout(() => {
 
@@ -293,7 +276,7 @@ function switchTab(tabName) {
     }
 }
 
-// 2. Fikstür Verilerini Supabase'den Çek
+
 // 2. Fikstür Verilerini Supabase'den Çek (SEZON DESTEKLİ)
 async function fetchFixtures(leagueId, season) {
     const fixtureList = document.getElementById("fixtureList");
@@ -326,7 +309,6 @@ async function fetchFixtures(leagueId, season) {
 }
 
 
-// 3. İlgili Haftanın Maçlarını Ekrana Bas (TARİH EKLENTİLİ)
 // 3. İlgili Haftanın Maçlarını Ekrana Bas (CANLI DAKİKA DESTEKLİ)
 function renderWeek(weekNum) {
     const fixtureList = document.getElementById("fixtureList");
@@ -461,7 +443,6 @@ function showMatchDetails(matchId) {
             </div>
         </div>`;
 
-    // --- VERİLERİ PARÇALAMA ---
   // --- VERİLERİ PARÇALAMA (Akıllı Kontrol) ---
     const matchData = match.events; 
     let istaData = [];
