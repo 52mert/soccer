@@ -40,7 +40,7 @@ async function fetchStandings(leagueId, season) {
     const tbody = document.getElementById("standingBody");
     if(!tbody) return;
     
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">🔄 Puan Durumu Hesaplanıyor... alooo</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">🔄 Puan Durumu Hesaplanıyor...</td></tr>';
 
     let finalData = [];
 
@@ -58,7 +58,7 @@ async function fetchStandings(leagueId, season) {
 
     if (!matchError && matches && matches.length > 0) {
         let hesaplananTablo = {};
-        
+        console.log("selam");
         // YENİ: Sadece isimleri değil, o anki skoru da tutacak olan SÖZLÜK
         let canliSkorlar = {}; 
 
