@@ -161,7 +161,16 @@ async function fetchStandings(leagueId, season) {
             .eq('sezon', String(season))
             .order('puan', { ascending: false });
 
+
+        
         if (!error && data && data.length > 0) {
+            data.sort((a,b)=>{
+                if(a.puan===b.puan){ let averaj1=a.ag-a.yg;
+                                    let averaj2=b.ag-b.yg;
+                                    return averaj2-averaj1;//buyukten kucuge siralamasi icin 2.yi yazariz
+                }
+                return b.puan-a.puan;//sort robotuna guven olmaz 
+            });
             tbody.innerHTML = "";
             data.forEach((team, index) => {
                 const teamLogo = team.takim_logo || 'https://via.placeholder.com/24?text=?';
