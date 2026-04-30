@@ -385,7 +385,36 @@ function renderWeek(weekNum) {
             </div>
         `;
     });
+    initHaftaSecici();
 }
+function initHaftaSecici() {
+    const haftaSecici = document.getElementById("haftaSecici");
+    if (!haftaSecici) return; // HTML'de yoksa hata vermesin diye güvenlik önlemi
+    
+    // Senin formülünle toplam haftayı buluyoruz
+    const totalWeeks = Math.ceil(allFixtures.length / matchesPerWeek);
+    
+    // Select'in içini baştan temizliyoruz (iki kere çağrılırsa üst üste binmesin diye)
+    haftaSecici.innerHTML = "";
+
+    // 1'den toplam haftaya kadar döngüye girip option'ları ekliyoruz
+    for (let i = 1; i <= totalWeeks; i++) {
+        const option = document.createElement("option");
+        option.value = i;
+        option.innerText = `${i}. Hafta`;
+        haftaSecici.appendChild(option);
+    }
+
+    // Menüyü oluşturduktan sonra o anki haftamızı seçili hale getiriyoruz
+    haftaSecici.value = currentWeek; 
+}
+
+function seciliHaftayiGetir(secilenDeger) {
+    // Select'ten gelen değer string olduğu için parseInt ile sayıya çeviriyoruz
+    currentWeek = parseInt(secilenDeger); 
+    renderWeek(currentWeek); // Ekranı yeni haftaya göre çizdir
+}
+
 // 4. İleri/Geri Butonları İçin Fonksiyon
 function changeWeek(direction) {
     if (allFixtures.length === 0) return;
