@@ -6,6 +6,43 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 const API_KEY = process.env.API_SPORTS_KEY; 
 const CRON_SECRET = process.env.CRON_SECRET;
 
+const MAX_DAILY_API_REQUESTS = 90;
+
+async function getTodayUsage(date) {
+    const { data, error } = await supabase
+        .from('api_usage')
+        .select('request_count')
+        .eq('usage_date', date)
+        .single();
+
+    if (error && error.code !== 'PGRST116') {
+        throw error;
+    }
+
+    return data?.request_count ?? 0;
+}
+
+async function increaseUsage(date, amount = 1) {
+    const current = await getTodayUsage(date);
+
+    const { error } = await supabase
+        .from('api_usage')
+        .upsert({
+            usage_date: date,
+            request_count: current + amount,
+            updated_at: new Date()
+        });
+
+    if (error) throw error;
+
+    return current + amount;
+}
+
+async function canUseApi(date, amount = 1) {
+    const current = await getTodayUsage(date);
+    return current + amount <= MAX_DAILY_API_REQUESTS;
+}
+
 export default async function handler(req, res) {
     // 1. GÜVENLİK KONTROLÜ
     if (req.headers.authorization !== `Bearer ${CRON_SECRET}`) {
@@ -23,9 +60,14 @@ export default async function handler(req, res) {
 
         console.log(`1. Türkiye Tarihi: ${trToday} için API'ye istek atılıyor...`);
 
+        if (!(await canUseApi(trToday, 1))) {
+    return res.status(200).json({ message: "Günlük API limiti doldu. İşlem yapılmadı." });
+}
+
         const response = await fetch(`https://v3.football.api-sports.io/fixtures?date=${trToday}&timezone=Europe/Istanbul`, {
             headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
         });
+        await increaseUsage(trToday, 1);
         const json = await response.json();
         
         // rawMatches o güne ait tüm maçlardır (00:00'dan 23:59'a kadar)
@@ -180,9 +222,16 @@ export default async function handler(req, res) {
             // --- BURADAN AŞAĞISI SADECE BAŞLAMIŞ VEYA BİTMİŞ MAÇLAR İÇİN ÇALIŞIR ---
             
             // İşte şimdi API hakkımızı harcayabiliriz, çünkü içeride veri var!
+        if (!(await canUseApi(trToday, 1))) {
+    console.log("Günlük API limiti 90'a ulaştı. Detay isteği pas geçildi.");
+    continue;
+}
             const detailRes = await fetch(`https://v3.football.api-sports.io/fixtures?id=${matchId}`, {
                 headers: { "x-rapidapi-key": API_KEY, "x-rapidapi-host": "v3.football.api-sports.io" }
             });
+
+        await increaseUsage(trToday, 1);
+        
             const detailJson = await detailRes.json();
             const m = detailJson.response[0];
 
