@@ -2,10 +2,16 @@ name: Mert Skor - Mac Guncelleme Cron
 
 on:
   schedule:
-    # 2 saatte bir çalışır (Örn: 10:00, 12:00, 14:00...)
-    - cron: '0 */2 * * *'
+    # TR 12:00 ve 15:00 → listeyi hazırla
+    - cron: "0 9,12 * * *"
     
-  workflow_dispatch: # Manuel çalıştırmak istersen buton hala orada
+    # TR 18:00 - 02:30 → maç saatleri (15 dk'da bir)
+    - cron: "*/15 15-23 * * *"
+
+    # TR 03:10 → son güncelleme
+    - cron: "10 0 * * *"
+
+  workflow_dispatch:
 
 jobs:
   cron:
