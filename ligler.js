@@ -660,7 +660,7 @@ function showMatchDetails(matchId) {
         const tumOlaylar = [...olayData].sort((a, b) => a.time.elapsed - b.time.elapsed);
 
        tumOlaylar.forEach(event => {
-    const isHome = event.team.name === match.home_team_name;
+   const isHome = match.home_team_name.includes(event.team.name) || event.team.name.includes(match.home_team_name);
     const flexDir = isHome ? "row" : "row-reverse";
     const textAlign = isHome ? "left" : "right";
 
