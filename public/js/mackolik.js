@@ -17,7 +17,7 @@ navItems.forEach(item => {
     item.addEventListener("click", e => {
         e.preventDefault();
         if (item.dataset.type === "league") {
-            window.location.href = 'ligler.htm';
+            window.location.href = '/ligler.html';
         } else {
             getMatches(item.dataset.type);
         }
