@@ -539,9 +539,8 @@ function changeWeek(direction) {
 
 // LİGLERE GERİ DÖN BUTONU
 function backToLeagues() {
-   window.location.href="/index.html";
-} 
-
+   window.location.reload();
+}
 
 // --- MAÇ DETAYLARI (İSTATİSTİK VE OLAYLAR) ---
 
