@@ -359,7 +359,23 @@ function renderWeek(weekNum) {
 
     fixtureList.innerHTML = ""; 
 
+weeklyMatches.sort((a, b) => {
+  // 1. Tarihleri parçalara ayır: "1 Nisan 2026" -> ["1", "Nisan", "2026"]
+  const parcaA = a.match_date_text.split(" ");
+  const parcaB = b.match_date_text.split(" ");
 
+  // 2. İlk indeksi (günü) al ve tam sayıya çevir
+  const gunA = parseInt(parcaA[0]); // "10" -> 10 olur
+  const gunB = parseInt(parcaB[0]); // "2" -> 2 olur
+
+  // 3. Günleri kıyasla
+  if (gunA !== gunB) {
+    return gunA - gunB; // Küçük sayı (gün) yukarı çıkar
+  }
+
+  // 4. Eğer günler aynıysa, saatleri kıyasla (localeCompare burada güvenli)
+  return a.match_time.localeCompare(b.match_time);
+});
 
     weeklyMatches.forEach(mac => {
 
