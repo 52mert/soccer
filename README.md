@@ -82,7 +82,9 @@ lig_siralamasi
 
 API veya maç verisi eksik olduğunda kullanılmak üzere yedek puan durumu verilerini tutar.
 
+
 🚧 Karşılaşılan Problemler ve Çözümler
+
 Problem: API İstek Limiti
 
 Ücretsiz API paketinde günlük istek limiti olduğu için tüm kullanıcıların doğrudan API'ye bağlanması mümkün değildi.
@@ -151,7 +153,8 @@ GitHub Actions Secrets
 
 Frontend tarafında sadece public/anon Supabase key kullanılır. Yazma işlemleri serverless backend üzerinden yapılır.
 
-📸 Ekran Görüntüleri
+📸 demo
+
 <img width="600" alt="Aydınlık Mod - Ana Sayfa" src="https://github.com/user-attachments/assets/cb5744fe-5c02-4dc3-b1ed-0132fc3b1a34" />
 
 <br><br>
@@ -165,6 +168,7 @@ Frontend tarafında sadece public/anon Supabase key kullanılır. Yazma işlemle
 <br><br>
 
 <img width="250" alt="Mobil Görünüm - Maç Olayları ve İstatistikler" src="https://github.com/user-attachments/assets/836166d4-9042-4811-9fb3-9b73291c0da7" />
+
 🎯 Gelecek Planları
 Kod yapısını modüler hale getirmek
 Frontend tarafını React ile yeniden geliştirmek
@@ -179,4 +183,5 @@ Takım ve lig bazlı detaylı istatistik sayfaları oluşturmak
 Mert Şahin Vergili
 
 LinkedIn: https://www.linkedin.com/in/mert-vergili-10162539a/
+
 GitHub: 
