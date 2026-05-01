@@ -61,6 +61,7 @@ graph LR
     V --> DB[(Supabase PostgreSQL)]
     DB --> UI[Frontend - Vanilla JS]
     UI --> PD[Canlı Puan Durumu Hesaplama]
+end
 ```
 🗄 Veritabanı Yapısı
 
