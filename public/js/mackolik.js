@@ -65,7 +65,7 @@ async function getMatches(type) {
                 const canliDurumlar = ["1H", "2H", "HT", "ET", "P", "LIVE"];
                 filtrelenmisMaclar = data.filter(match => canliDurumlar.includes(match.status_short));
             } else if (type === "today" || !type) {
-                filtrelenmisMaclar = data.filter(match => match.match_date && match.match_date.startsWith(bugun));
+                filtrelenmisMaclar = data;
             }
 
             // MÜKEMMEL ALGORİTMA: Artık hem "Live" hem "Today" için ortak çalışıyor!
