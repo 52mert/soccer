@@ -63,126 +63,143 @@ graph LR
     UI --> PD[Canlı Puan Durumu Hesaplama]
 
 ```
-🗄 Veritabanı Yapısı
+## 🗄 Veritabanı Yapısı
 
 Projede temel olarak 4 tablo kullanıldı:
 
-daily_matches
-
+### `daily_matches`
 Günün maçlarını tutar. Günlük olarak temizlenir ve yeniden doldurulur.
 
-selected_matches
-
+### `selected_matches`
 Öncelik algoritmasına göre seçilen maçların olay ve istatistik verilerini tutar.
 
-matches
-
+### `matches`
 Ana fikstür tablosudur. Lig, sezon, takım, skor, durum, tarih ve maç olayları gibi kalıcı verileri içerir.
 
-lig_siralamasi
-
+### `lig_siralamasi`
 API veya maç verisi eksik olduğunda kullanılmak üzere yedek puan durumu verilerini tutar.
 
+---
 
-🚧 Karşılaşılan Problemler ve Çözümler
+## 🚧 Karşılaşılan Problemler ve Çözümler
 
-Problem: API İstek Limiti
-
+### Problem: API İstek Limiti
 Ücretsiz API paketinde günlük istek limiti olduğu için tüm kullanıcıların doğrudan API'ye bağlanması mümkün değildi.
 
-Çözüm:
+**Çözüm:**  
 Veriler Supabase'e cache'lendi. Frontend doğrudan API yerine Supabase üzerinden veri okumaya başladı.
 
-Problem: Vercel Ücretsiz Planda Cron Kısıtı
+---
 
+### Problem: Vercel Ücretsiz Planda Cron Kısıtı
 Vercel ücretsiz planda zamanlanmış görevleri kullanmak mümkün değildi.
 
-Çözüm:
-GitHub Actions üzerinde cron.yml oluşturuldu. Bu cron job, Vercel endpoint'ini belirli aralıklarla tetikledi.
+**Çözüm:**  
+GitHub Actions üzerinde `cron.yml` oluşturuldu. Bu cron job, Vercel endpoint'ini belirli aralıklarla tetikledi.
 
-Problem: Maç Detayları İçin Fazladan API Harcaması
+---
 
+### Problem: Maç Detayları İçin Fazladan API Harcaması
 Her maç için olay ve istatistik çekmek API limitini çok hızlı bitiriyordu.
 
-Çözüm:
+**Çözüm:**  
 Sadece öncelik algoritmasına göre seçilen 3 maç için detay verisi çekildi. Maç başlamamışsa detay API çağrısı yapılmadı.
 
-Problem: Canlı Puan Durumu
+---
 
+### Problem: Canlı Puan Durumu
 Canlı maçların skoru değiştikçe puan durumunun da anlık değişmesi gerekiyordu.
 
-Çözüm:
-Frontend tarafında matches tablosundaki bitmiş ve canlı maçlar üzerinden puan durumu dinamik olarak hesaplandı.
+**Çözüm:**  
+Frontend tarafında `matches` tablosundaki bitmiş ve canlı maçlar üzerinden puan durumu dinamik olarak hesaplandı.
 
-Problem: Takım İsimlerinin Farklı Gelmesi
+---
 
+### Problem: Takım İsimlerinin Farklı Gelmesi
 API'deki takım isimleri ile veritabanındaki takım isimleri bazen farklı formatlarda geliyordu.
 
-Çözüm:
+**Çözüm:**  
 Geçici olarak takım isimleri için eşleştirme sözlüğü kullanıldı. Gelecek geliştirmede takım ID bazlı daha sağlam bir yapı planlanıyor.
 
-🛠 Kullanılan Teknolojiler
-Frontend
-HTML5
-CSS3
-JavaScript
-Responsive Design
-Backend
-Node.js
-Vercel Serverless Functions
-REST API
-Database
-Supabase
-PostgreSQL
-JSONB veri yapısı
-Row Level Security
-DevOps
-GitHub Actions
-Cron Jobs
-Environment Variables
-Git / GitHub
-🔐 Güvenlik
+---
+
+## 🛠 Kullanılan Teknolojiler
+
+### Frontend
+- HTML5  
+- CSS3  
+- JavaScript  
+- Responsive Design  
+
+### Backend
+- Node.js  
+- Vercel Serverless Functions  
+- REST API  
+
+### Database
+- Supabase  
+- PostgreSQL  
+- JSONB  
+- Row Level Security  
+
+### DevOps
+- GitHub Actions  
+- Cron Jobs  
+- Environment Variables  
+- Git / GitHub  
+
+---
+
+## 🔐 Güvenlik
 
 API key, Supabase service role key ve cron secret gibi gizli bilgiler kod içinde tutulmaz.
 
 Bu bilgiler:
-
-Vercel Environment Variables
-GitHub Actions Secrets
+- Vercel Environment Variables  
+- GitHub Actions Secrets  
 
 üzerinden güvenli şekilde yönetilir.
 
 Frontend tarafında sadece public/anon Supabase key kullanılır. Yazma işlemleri serverless backend üzerinden yapılır.
 
-📸 demo
+---
 
-<img width="600" alt="Aydınlık Mod - Ana Sayfa" src="https://github.com/user-attachments/assets/cb5744fe-5c02-4dc3-b1ed-0132fc3b1a34" />
+## 📸 Demo
 
-<br><br>
-
-<img width="600" alt="Karanlık Mod - Puan Durumu ve Canlı Skor" src="https://github.com/user-attachments/assets/95dbade5-a32b-45e1-8048-cfd4fe84288b" />
+<img width="600" src="https://github.com/user-attachments/assets/cb5744fe-5c02-4dc3-b1ed-0132fc3b1a34" />
 
 <br><br>
 
-<img width="600" alt="Karanlık Mod - Fikstür ve Haftalar" src="https://github.com/user-attachments/assets/0fcc2234-6903-4e3a-945e-223784d1e7a2" />
+<img width="600" src="https://github.com/user-attachments/assets/95dbade5-a32b-45e1-8048-cfd4fe84288b" />
 
 <br><br>
 
-<img width="250" alt="Mobil Görünüm - Maç Olayları ve İstatistikler" src="https://github.com/user-attachments/assets/836166d4-9042-4811-9fb3-9b73291c0da7" />
+<img width="600" src="https://github.com/user-attachments/assets/0fcc2234-6903-4e3a-945e-223784d1e7a2" />
 
-🎯 Gelecek Planları
-Kod yapısını modüler hale getirmek
-Frontend tarafını React ile yeniden geliştirmek
-Takım isimleri yerine takım ID bazlı veri modeli kurmak
-selected_matches tablosunda olaylar ve istatistikleri daha temiz ayırmak
-UI/UX tasarımını geliştirmek
-Mobil uyumluluğu artırmak
-PWA desteği eklemek
-Takım ve lig bazlı detaylı istatistik sayfaları oluşturmak
-👤 Developer
+<br><br>
 
-Mert Şahin Vergili
+<img width="250" src="https://github.com/user-attachments/assets/836166d4-9042-4811-9fb3-9b73291c0da7" />
 
-LinkedIn: https://www.linkedin.com/in/mert-vergili-10162539a/
+---
 
-GitHub: 
+## 🎯 Gelecek Planları
+
+- Kod yapısını modüler hale getirmek  
+- Frontend tarafını React ile yeniden geliştirmek  
+- Takım isimleri yerine takım ID bazlı veri modeli kurmak  
+- `selected_matches` tablosunda olaylar ve istatistikleri ayırmak  
+- UI/UX geliştirmeleri yapmak  
+- Mobil uyumluluğu artırmak  
+- PWA desteği eklemek  
+- Daha detaylı istatistik sayfaları oluşturmak  
+
+---
+
+## 👤 Developer
+
+**Mert Şahin Vergili**
+
+- LinkedIn: https://www.linkedin.com/in/mert-vergili-10162539a/  
+- GitHub: (buraya profil linkini koy)
+
+
