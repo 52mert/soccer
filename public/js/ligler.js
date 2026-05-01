@@ -539,7 +539,7 @@ function changeWeek(direction) {
 
 // LİGLERE GERİ DÖN BUTONU
 function backToLeagues() {
-   window.location.href="public/index.html";
+   window.location.href="/index.html";
 } 
 
 
