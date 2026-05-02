@@ -1,8 +1,8 @@
-// 1. SUPABASE BAĞLANTI BİLGİLERİ (GÜVENLİ)
+// 1. SUPABASE BAĞLANTI BİLGİLERİ
 const SUPABASE_URL = 'https://xozwjuudbypmqewncdoo.supabase.co';
 const SUPABASE_ANON_KEY ='sb_publishable_XeQN6Ha9dWfJ_SqjLUsx9A_DM-8ld4k'; 
 
-// 2. ELEMANLARI SEÇELİM
+
 const matchesDiv = document.getElementById("matches"); 
 const statsPage = document.getElementById("statsPage");
 const navItems = document.querySelectorAll(".nav-item");
