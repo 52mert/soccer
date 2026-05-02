@@ -68,7 +68,7 @@ async function getMatches(type) {
                 filtrelenmisMaclar = data;
             }
 
-            // MÜKEMMEL ALGORİTMA: Artık hem "Live" hem "Today" için ortak çalışıyor!
+          
             // Seçilmiş maçları en üste alır.
             filtrelenmisMaclar.sort((a, b) => {
                 const aIsSelected = selectedIds.includes(a.match_id) ? 1 : 0;
@@ -193,7 +193,7 @@ async function localStatistics(matchId) {
             return;
         }
 
-        // --- PAKETLENMİŞ VERİYİ AÇMA (KRİTİK NOKTA) ---
+      
         // Backend'de "events" sütununa hem istatistikleri hem olayları koyduğumuz için buradan çekiyoruz
         const paket = details.events || {}; 
         const gelenIstatistikler = paket.istatistikler || [];
