@@ -18,7 +18,7 @@ async function selectLeague(leagueId) {
     if(selectionScene) selectionScene.style.display = 'none';
     if(detailScene) detailScene.style.display = 'block';
 
-    // Başlıkları güncelle
+  
     const leagueNames = {
         203: "Trendyol Süper Lig",
         39: "Premier League",
@@ -46,7 +46,7 @@ async function fetchStandings(leagueId, season) {
 
     console.log(`${leagueId} ligi ${season} sezonu hesaplanıyor...`);
     
-    // SİHİR 1: Artık sadece FT değil, canlı oynanan maçları da dahil ediyoruz!
+    
     const validStatuses = ['FT', '1H', '2H', 'HT', 'LIVE', 'ET', 'P', 'BT'];
 
     const { data: matches, error: matchError } = await _supabase
@@ -54,7 +54,7 @@ async function fetchStandings(leagueId, season) {
         .select('*')
         .eq('league_id', leagueId)
         .eq('season', String(season))
-        .in('status', validStatuses); // Canlı maçlar da matematiğe dahil oldu
+        .in('status', validStatuses); 
 
     if (!matchError && matches && matches.length > 0) {
         let hesaplananTablo = {};
@@ -63,7 +63,7 @@ async function fetchStandings(leagueId, season) {
         let canliSkorlar = {}; 
 
         matches.forEach(mac => {
-            // SİHİR 2: Eğer maçın dakikası varsa (elapsed null değilse), takım canlı oynuyordur!
+         
             if (mac.elapsed !== null) {
                 // Skoru "Ev - Dep" formatında kaydediyoruz
                 let anlikSkor = `${mac.home_score} - ${mac.away_score}`;
@@ -122,10 +122,10 @@ async function fetchStandings(leagueId, season) {
         finalData.forEach((team, index) => {
             const teamLogo = team.logo || 'https://via.placeholder.com/24?text=?';
             
-            // YENİ: Takımın o an oynadığı bir maç var mı diye sözlüğe bakıyoruz
+         
             const canliSkor = canliSkorlar[team.takim_adi];
             
-            // YENİ: Eğer canlı maç varsa nokta yerine yanıp sönen şık bir skor rozeti koy!
+         
             const liveIndicator = canliSkor 
                 ? `<span style="color: #ff3b30; font-weight: 900; font-size: 0.85em; background: rgba(255, 59, 48, 0.15); padding: 3px 7px; border-radius: 5px; border: 1px solid rgba(255, 59, 48, 0.3); animation: blinker 1.5s linear infinite; margin-right: 8px; box-shadow: 0 0 8px rgba(255, 59, 48, 0.2);">${canliSkor}</span>` 
                 : ``;
@@ -220,7 +220,7 @@ themeToggle.addEventListener('click', () => {
 
     
 
-    // Profesyonel Dönme Animasyonu Sınıfı Ekle
+  
 
     themeToggle.classList.add('rotating');
 
@@ -277,7 +277,7 @@ function switchTab(tabName) {
 }
 
 
-// 2. Fikstür Verilerini Supabase'den Çek (SEZON DESTEKLİ)
+// 2. Fikstür Verilerini Supabase'den Çek 
 async function fetchFixtures(leagueId, season) {
     const fixtureList = document.getElementById("fixtureList");
     fixtureList.innerHTML = '<div style="text-align:center; padding:20px;">🔄 Maçlar Yükleniyor...</div>';
@@ -287,7 +287,7 @@ async function fetchFixtures(leagueId, season) {
         .from('matches')
         .select('*')
         .eq('league_id', leagueId)
-        .eq('season', String(season)) // YENİ: Hangi sezon seçiliyse onu çeker!
+        .eq('season', String(season)) 
         .order('id', { ascending: true });
 
     if (error) {
@@ -313,7 +313,7 @@ function renderWeek(weekNum) {
     const fixtureList = document.getElementById("fixtureList");
     const haftaSecici = document.getElementById("haftaSecici"); 
     const btnGuncelHafta = document.getElementById("btnGuncelHafta");
-    const seasonSelect = document.getElementById("seasonSelect"); // Doğru ID eklendi!
+    const seasonSelect = document.getElementById("seasonSelect"); 
 
     // --- GÜNCEL HAFTA BUTONU GİZLEME/GÖSTERME ---
     if (btnGuncelHafta && seasonSelect) {
@@ -337,7 +337,7 @@ function renderWeek(weekNum) {
 
 
 
-    // ESKİSİ: weekDisplay.innerText = `${currentWeek}. Hafta`;
+  
 
     // YENİSİ: Select menüsünün seçili değerini güncelliyoruz
 
@@ -491,8 +491,7 @@ weeklyMatches.sort((a, b) => {
 
 // Güncel Haftaya Git Fonksiyonu
 function guncelHaftayaDon() {
-    // Şimdilik güncel haftayı 28 olarak belirliyoruz.
-    // İleride API'den dinamik olarak hangi haftada olduğumuzu çektiğinde burayı güncelleyebilirsin.
+  
     const guncelHaftaDegeri = 32; 
     
     currentWeek = guncelHaftaDegeri;
