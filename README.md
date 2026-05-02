@@ -200,6 +200,6 @@ Frontend tarafında sadece public/anon Supabase key kullanılır. Yazma işlemle
 **Mert Şahin Vergili**
 
 - LinkedIn: https://www.linkedin.com/in/mert-vergili-10162539a/  
-- GitHub: (buraya profil linkini koy)
+- GitHub: https://github.com/52mert
 
 
